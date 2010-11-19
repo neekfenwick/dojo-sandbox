@@ -3,9 +3,19 @@ GETTING STARTED
 
 To get the dojo-sandbox repo in a local dir:
 
-git clone git://github.com/neekfenwick/dojo-sandbox.git
+$ git clone git@github.com:neekfenwick/dojo-sandbox.git
+
+..edit files..
+
+$ git commit -a
+$ git push
 
 To build the custom build to lib/dojo:
+
+$ cd app/public/config
+$ ./build-sandbox-dojo.js
+
+Or, run the steps yourself:
 
 $ cd app/public/lib/dojo-release-1.5.0-src/util/buildscripts
 $ cp ../../../../config/sandboxCopyright.txt .
