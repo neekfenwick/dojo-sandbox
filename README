@@ -3,7 +3,7 @@ GETTING STARTED
 
 To get the dojo-sandbox repo in a local dir:
 
-git clone git://github.com/neekfenwick/dojo-sandbox.git
+git clone git@github.com:neekfenwick/dojo-sandbox.git
 
 To build the custom build to lib/dojo:
 
@@ -25,5 +25,23 @@ http://myserver.com/index.php?debug=1
 
 To not load the sandbox.js layer (so that dojo loads fast but sandbox dijits are loaded separately):
 http://myserver.com/index.php?nolayer=1
+
+SETTING UP THE VIRTUAL HOST
+-----------------
+
+Its important to set AllowOverride All because in /public/backend/ is a .htaccess file that wraps all requests to the index.php
+
+<VirtualHost *:80>
+    	DocumentRoot "path/to/public"
+    	ServerName dojo-sandbox.localhost
+	
+	<Directory "path/to/public">
+		DirectoryIndex index.html index.php
+    		AllowOverride All
+		Order allow,deny
+		Allow from all
+	</Directory>
+</VirtualHost>
+
 
 
