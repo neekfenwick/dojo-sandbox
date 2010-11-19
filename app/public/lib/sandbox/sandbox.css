@@ -5,3 +5,7 @@ html, body, .frontend {
 .claro .dijitContentPane {
 	padding: 0;
 }
+
+.frontend {
+	width: 100%; height: 100%;
+}
