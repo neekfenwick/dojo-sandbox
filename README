@@ -1,1 +1,29 @@
-Initial content.
+GETTING STARTED
+---------------
+
+To get the dojo-sandbox repo in a local dir:
+
+git clone git://github.com/neekfenwick/dojo-sandbox.git
+
+To build the custom build to lib/dojo:
+
+$ cd app/public/lib/dojo-release-1.5.0-src/util/buildscripts
+$ cp ../../../../config/sandboxCopyright.txt .
+$ ./build.sh profile=../../../../../config/sandbox releaseName=dojo version=1.5.0-sandbox releaseDir=../../.. optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
+
+
+CALLING THE APP
+---------------
+
+For development, we have the option of running compiled or non-compiled versions of the code, and whether we include the layer .js files or not.  Note that debug=1 and no*layer=1 are incompatible, because the -src dir doesn't have the layer files.
+
+To run in 'build' mode, using dojo in lib/dojo and built layers:
+http://myserver.com/index.php
+
+To run in 'debug' mode, using dojo in lib/dojo-release-1.5.0-src
+http://myserver.com/index.php?debug=1
+
+To not load the sandbox.js layer (so that dojo loads fast but sandbox dijits are loaded separately):
+http://myserver.com/index.php?nolayer=1
+
+

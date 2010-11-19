@@ -1,0 +1,13 @@
+<div dojoAttachPoint="containerNode">
+	<div dojoType="dijit.layout.BorderContainer" gutters="false">
+		<div dojoType="dijit.layout.ContentPane" region="top" splitter="false">
+			<div dojoType="dijit.Toolbar">
+				<div dojoType="dijit.form.Button" label="Update" dojoAttachEvent="onClick: _updateClick"></div>
+				<div dojoType="dijit.form.Button" label="Save As New" dojoAttachEvent="onClick: _saveasnewClick"></div>
+				<div dojoType="dijit.form.Button" label="Delete" dojoAttachEvent="onClick: _deleteClick"></div>
+			</div>
+		</div>
+		<div dojoType="dijit.layout.ContentPane" region="left" splitter="false">LEFT<br/>LEFT<br/>LEFT<br/>LEFT<br/></div>
+		<div dojoType="dijit.layout.ContentPane" region="center" splitter="false" dojoAttachPoint="centerRegion">CENTER</div>
+	</div>
+</div>
