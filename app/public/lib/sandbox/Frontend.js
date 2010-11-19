@@ -6,22 +6,41 @@ dojo.require("dijit.layout.BorderContainer");
 dojo.require("dijit.Toolbar");
 dojo.require("dijit.form.Button");
 dojo.require("dojox.data.JsonRestStore");
+dojo.require("dijit.layout.TabContainer");
+dojo.require("dijit.form.SimpleTextarea");
 
-dojo.declare("sandbox.Frontend", [dijit.layout.ContentPane, dijit._Templated], {
+dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 
 	widgetsInTemplate: true,
 	templateString: dojo.cache("sandbox", "templates/Frontend.html"),
+	_editors: [],
+	
+	constructor: function(){
+		this._editors = [
+			{"id": "javascript", "containerNode": "centerLeftPane", "widget": null, "syntax": "js", "getValue": function(){}},
+			{"id": "html", "containerNode": "centerTopRightPane", "widget": null, "syntax": "html", "getValue": function(){}},
+			{"id": "css", "containerNode": "centerBottomRightPane", "widget": null, "syntax": "css", "getValue": function(){}}
+		];
+	},
 
 	postCreate: function() {
 		this.inherited(arguments);
 
 		this.fetchConfig();
+		this.setupEditors();
+	},
+	
+	startup: function(){
+		this.inherited(arguments);
+		
+		//@TODO: fix this hack! the tabcontainer needs to get resized on startup. why?!
+		setTimeout(dojo.hitch(this.mainBorderContainer, "layout"), 100);
 	},
 
 	fetchConfig: function() {
-//		dojo.xhrGet( {
-//			url: 'app/backend_handler.php/config' // REST style
-//		})
+		dojo.xhrDelete( {
+			url: 'backend/config' // REST style
+		})
 		this.configStore = new dojox.data.JsonRestStore( {
 			target: 'backend/config'
 		});
@@ -46,6 +65,38 @@ dojo.declare("sandbox.Frontend", [dijit.layout.ContentPane, dijit._Templated], {
 		}
 
 	},
+	
+	setupEditors: function(){
+		dojo.forEach(this._editors, function(editor){
+			editor.widget = new dijit.form.SimpleTextarea({"style": "height: 100%; width: 100%;"});
+			editor.widget.placeAt(this[editor.containerNode].containerNode);
+			editor.getValue = function(){
+				return editAreaLoader.getValue(this.widget.textbox.id);
+			};
+			
+			
+			editAreaLoader.init({
+				id: editor.widget.textbox.id
+				,start_highlight: true
+				,allow_resize: "no"
+				,allow_toggle: false
+				,word_wrap: false
+				,language: "en"
+				,syntax: editor.syntax
+				,is_editable: true
+				,toolbar: "syntax_selection, search, go_to_line, |, undo, redo, |, select_font,|, highlight, reset_highlight, word_wrap" 
+			});
+			
+		}, this);
+	},
+	
+	_getEditorItem:function(id){
+		return dojo.filter(this._editors, function(editor){
+			if(editor.id == id){
+				return editor;
+			}
+		})[0];
+	},
 
 	getUserDetails: function(username) {
 		// Request to backend for user details here
@@ -64,6 +115,28 @@ dojo.declare("sandbox.Frontend", [dijit.layout.ContentPane, dijit._Templated], {
 
 	_deleteClick: function() {
 
+	},
+	
+	_runClick: function(){
+
+		var request = {
+			"html":  this._getEditorItem("html").getValue(),
+			"css":  this._getEditorItem("css").getValue(),
+			"javascript":  this._getEditorItem("javascript").getValue()
+		};
+		
+		// Sends the content of the Editors to the Backend and runs the Output in an iFrame
+		dojo.xhrPost({
+			"url": "backend/run",
+			"content": request,
+			"handleAs": "json",
+			"load": dojo.hitch(this, function(response){
+				if(typeof(response.id) != "undefined"){
+					this.iframeRunNode.src = "backend/run/index/id/"+response.id;
+				}
+			})
+		});
+		
 	}
 
 });

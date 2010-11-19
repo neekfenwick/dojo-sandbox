@@ -10,12 +10,6 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		// Specifying all controllers as RESTful:
 		$restRoute = new Zend_Rest_Route($front);
 		$router->addRoute('default', $restRoute);
-
-		// Specifying the "api" module only as RESTful:
-		$restRoute = new Zend_Rest_Route($front, array(), array(
-		    'api',
-		));
-		$router->addRoute('rest', $restRoute);
 	}
 	
 	protected function _initView()    

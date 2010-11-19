@@ -1,13 +1,23 @@
-<div dojoAttachPoint="containerNode">
-	<div dojoType="dijit.layout.BorderContainer" gutters="false" style="height: 100%; width: 100%;">
-		<div dojoType="dijit.layout.ContentPane" region="top" splitter="false">
-			<div dojoType="dijit.Toolbar">
-				<div dojoType="dijit.form.Button" label="Update" dojoAttachEvent="onClick: _updateClick"></div>
-				<div dojoType="dijit.form.Button" label="Save As New" dojoAttachEvent="onClick: _saveasnewClick"></div>
-				<div dojoType="dijit.form.Button" label="Delete" dojoAttachEvent="onClick: _deleteClick"></div>
+<div>
+	<div dojoType="dijit.layout.BorderContainer" gutters="false" dojoAttachPoint="mainBorderContainer" style="height: 100%; width: 100%;">
+		<div dojoType="dijit.Toolbar" region="top">
+			<div dojoType="dijit.form.Button" label="Update" dojoAttachEvent="onClick: _updateClick"></div>
+			<div dojoType="dijit.form.Button" label="Save As New" dojoAttachEvent="onClick: _saveasnewClick"></div>
+			<div dojoType="dijit.form.Button" label="Delete" dojoAttachEvent="onClick: _deleteClick"></div>
+		</div>
+		<div dojoType="dijit.layout.ContentPane" region="left" style="width: 150px;">LEFT<br/>LEFT<br/>LEFT<br/>LEFT<br/></div>
+		<div dojoType="dijit.layout.TabContainer" region="center" >
+			<div dojoType="dijit.layout.ContentPane" title="Develop">
+				<div dojoType="dijit.layout.BorderContainer" design="sidebar" style="border: none;">
+					<div dojoType="dijit.layout.ContentPane" region="leading" dojoAttachPoint="centerLeftPane" splitter="true" style="width: 50%;"></div>
+					<div dojoType="dijit.layout.ContentPane" region="top" dojoAttachPoint="centerTopRightPane" splitter="true" style="height: 50%;"></div>
+					<div dojoType="dijit.layout.ContentPane" region="center" dojoAttachPoint="centerBottomRightPane" splitter="true"></div>
+				</div>
+			</div>
+			<div dojoType="dijit.layout.ContentPane" title="Run" dojoAttachEvent="onShow:_runClick">
+				<iframe dojoAttachPoint="iframeRunNode" style="height: 100%; width: 100%; border: none;">
+				</iframe>
 			</div>
 		</div>
-		<div dojoType="dijit.layout.ContentPane" region="left" splitter="false">LEFT<br/>LEFT<br/>LEFT<br/>LEFT<br/></div>
-		<div dojoType="dijit.layout.ContentPane" region="center" splitter="false" dojoAttachPoint="centerRegion">CENTER</div>
 	</div>
 </div>
