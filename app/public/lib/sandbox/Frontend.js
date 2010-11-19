@@ -23,7 +23,7 @@ dojo.declare("sandbox.Frontend", [dijit.layout.ContentPane, dijit._Templated], {
 //			url: 'app/backend_handler.php/config' // REST style
 //		})
 		this.configStore = new dojox.data.JsonRestStore( {
-			target: 'app/backend_handler.php/config'
+			target: 'backend/config'
 		});
 		console.log("Fetching all config...");
 		this.configStore.fetch( {
