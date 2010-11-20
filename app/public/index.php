@@ -8,7 +8,8 @@
  *          0 = load the sandbox.js custom build layer.
  */
 $debug = false;
-$dojo_path = 'lib/dojo';
+$lib_path = 'lib';
+$dojo_path = $lib_path.'/dojo';
 $djConfig = '';
 $sandbox_path = '../sandbox';
 if (isset($_REQUEST['debug']) && $_REQUEST['debug'] == '1') {
@@ -23,6 +24,7 @@ $no_sandbox_layer = (isset($_REQUEST['nosandboxlayer']) && $_REQUEST['nosandboxl
 ?>
 <html>
 <head><title>Dojo sandbox</title>
+  <script type="text/javascript" src="<?php echo $lib_path; ?>/edit_area/edit_area_full.js"></script>
   <script type="text/javascript" src="<?php echo $dojo_path; ?>/dojo/dojo.js"
           djConfig="parseOnLoad: true<?php echo $djConfig; ?>"></script>
 <?php if (!$no_dojodeps_layer) { ?>
@@ -34,7 +36,7 @@ $no_sandbox_layer = (isset($_REQUEST['nosandboxlayer']) && $_REQUEST['nosandboxl
 
   <link rel="stylesheet" href="<?php echo $dojo_path; ?>/dojo/resources/dojo.css">
   <link rel="stylesheet" href="<?php echo $dojo_path; ?>/dijit/themes/claro/claro.css">
-  <link rel="stylesheet" href="<?php echo $dojo_path; ?>/sandbox/sandbox.css">
+  <link rel="stylesheet" href="<?php echo $lib_path; ?>/sandbox/sandbox.css">
   <script type="text/javascript">
 <?php if ($debug) { ?>
     dojo.registerModulePath("sandbox", "../../sandbox");

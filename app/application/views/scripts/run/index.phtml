@@ -1,0 +1,25 @@
+<html>
+<head><title>Dojo sandbox</title>
+  <script type="text/javascript" src="/lib/dojo-release-1.5.0-src/dojo/dojo.js"
+          djConfig="parseOnLoad: true, debug: true"></script>
+
+  <link rel="stylesheet" href="/lib/dojo-release-1.5.0-src/dojo/resources/dojo.css">
+  <link rel="stylesheet" href="/lib/dojo-release-1.5.0-src/dijit/themes/claro/claro.css">
+
+  <script type="text/javascript">
+	<?php
+		echo $this->javascript;
+	?>
+  </script>
+  <style type="text/css">
+	<?php
+		echo $this->css;
+	?>
+  </style>
+</head>
+<body class="claro">
+<?php 
+	echo $this->html;
+?>
+</body>
+</html>
