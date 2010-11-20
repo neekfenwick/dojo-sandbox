@@ -18,9 +18,9 @@ taken to mean '/public/1234'.  When logged on as wuhi, '1234 is taken to mean
 '/wuhi/1234'.  The url to a bucket must either include a namespace, or if no
 namespace is provided, 'public' is presumed, thus
 
-http://dojo-paste.net/1234
+http://dojo-sandbox.net/1234
 and
-http://dojo-paste.net/public/1234
+http://dojo-sandbox.net/public/1234
 
 refer to the same bucket.
 
@@ -31,9 +31,39 @@ A Bucket always has a latest version number, which corresponds to the version
 number of the most recently created version.
 
 A new bucket will have only one version, and
-http://dojo-paste.net/public/1234
+http://dojo-sandbox.net/public/1234
 refers to that bucket.  Incrementing the version number gives
-http://dojo-paste.net/public/1234/1
+http://dojo-sandbox.net/public/1234/1
+
+
+Buckets and Resources
+----------------------------
+A Bucket should be an all in one package. So it should contain all resources that it needs to run.
+e.g. .HTML files or .JSON/.XML
+There is no need for a real "filesystem". A resource should just have a unique name. Maybe a prefix could work like a directory. e.b. HTML/template.html
+
+Not sure how to handle the calls ... 
+	- http://dojo-sandbox.net/public/1234/4/HTML/template.html
+Maybe we should prohibit the Slash in the resourcename?!
+	
+External resources are forbidden. Exceptions are: Cross Domain Builds of dojo and it's Stylesheets
+Maybe some other external scripts like firebug-lite?
+
+Note we cannot avoid including external scripts in html pane by using a script-tag...
+
+We should limit the number or size of the resources!
+
+
+WYSIWYG Editor
+---------------------
+Based on the visual designer ( http://dojo.nod.at/designer/release/ ) it should be possible to edit resource files and the html-pane.
+The goal is to provide a helper by creating templates for widgets.
+
+TODO WYSIWYG Editor
+-----------------------------
+Create a smaller version that is configured to use dijit._Templated specific properties like dojoAttachPoint and events.
+Do some enhancements on the position system. Most widgets are using positin:relative. The Editor mostly uses position: absolute
+
 
 TODO Web Server Redirects
 -------------------------
@@ -41,26 +71,26 @@ TODO Web Server Redirects
 If would be useful if, when no version number is provided in the URL, the
 latest version number is presumed.  For example, if the public bucket 1234 has
 a latestVersion of 4, then the original URL of
-http://dojo-paste.net/public/1234
+http://dojo-sandbox.net/public/1234
 should redirect the user to the /4 version.
 
 This means that when a URL is entered that matches the bucket schema, some
 redirecting must happen in the context of the database.  Thus, simple
 .htaccess style rewriting is not sufficient.  For example, entering:
 
-http://dojo-paste.net/public/1234
+http://dojo-sandbox.net/public/1234
 should cause the script to look up bucket 1234, discover its latestVersion
 number, and issue a browser redirect to:
-http://dojo-paste.net/public/1234/4
+http://dojo-sandbox.net/public/1234/4
 
 Database Schema
 ---------------
 
-table users {
+table user {
   username TINYTEXT NOT NULL
 }
 
-table buckets {
+table bucket {
   namespace TINYTEXT NOT NULL, -- fk to users.username
   id TINYTEXT NOT NULL, -- unique id of this bucket, in its namespace
   name TINYTEXT NOT NULL,
@@ -69,7 +99,7 @@ table buckets {
   primary key (namespace, id)
 }
 
-table bucket_versions {
+table bucket_version {
   namespace TINYTEXT NOT NULL, -- fk to users.username
   id TINYTEXT NOT NULL, -- unique id of this bucket, in its namespace
   version int NOT NULL,
@@ -83,7 +113,7 @@ table bucket_versions {
 }
 
 -- TODO Think this through!
-table bucket_resources {
+table bucket_resource {
   namespace TINYTEXT NOT NULL, -- fk to users.username
   id TINYTEXT NOT NULL, -- unique id of this bucket, in its namespace
   version int NOT NULL,
@@ -95,10 +125,10 @@ table bucket_resources {
 Example Data
 ------------
 
-INSERT INTO buckets VALUES
+INSERT INTO bucket VALUES
 ( 'public', '1234', 'First bucket', 'long desc', 0);
 
-INSERT INTO bucket_versions VALUES
+INSERT INTO bucket_version VALUES
 ( 'public', '1234', 0, '1.5.0cdn', '/HTML/myWidget.html
 
 {
