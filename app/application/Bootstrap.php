@@ -17,13 +17,13 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		// Initialize view
 	    $view = new Zend_View();       
 	    $view->doctype('XHTML1_STRICT');        
-	    //$view->headTitle('more evis - mobile');
 	    $view->setEncoding('utf-8');
 	    $view->headMeta()->appendHttpEquiv('Content-Type','text/html; charset=utf-8');
 	     
 	    // Add it to the ViewRenderer        
 	    $viewRenderer = Zend_Controller_Action_HelperBroker::getStaticHelper('ViewRenderer');
 	    $viewRenderer->setView($view);   
+	    Zend_Controller_Action_HelperBroker::addPath( APPLICATION_PATH .'/controllers/helpers');
 
 	    // Return it, so that it can be stored by the bootstrap        
 	    return $view;    
@@ -79,12 +79,6 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			// Next, set the cache to be used with all table objects
 			Zend_Db_Table_Abstract::setDefaultMetadataCache($cache);
 
-			//create a 2nd databaseadapter for internal usage
-		$db = Zend_Db::factory('Pdo_Sqlite', array(
-		    'dbname' => dirname(__FILE__).'/database/tracker.s3db'
-		));
-		
-		Zend_Registry::set('sqliteAdapter', $db);  
 		}
 	}  
 	
