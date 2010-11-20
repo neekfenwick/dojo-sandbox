@@ -38,9 +38,9 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 	},
 
 	fetchConfig: function() {
-		dojo.xhrDelete( {
-			url: 'backend/config' // REST style
-		})
+		//dojo.xhrDelete( {
+		//	url: 'backend/config' // REST style
+		//})
 		this.configStore = new dojox.data.JsonRestStore( {
 			target: 'backend/config'
 		});
