@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS `user` (
+  `id` varchar(8) NOT NULL,
+  `name` varchar(70) NOT NULL,
+  `email` varchar(120) NOT NULL,
+  `password` varchar(32) NOT NULL,
+  `creationDate` datetime NOT NULL,
+  `modificationDate` datetime NOT NULL,
+  `active` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`)
+)
