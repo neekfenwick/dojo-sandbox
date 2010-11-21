@@ -45,7 +45,7 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 		//	url: 'backend/config' // REST style
 		//})
 		this.configStore = new dojox.data.JsonRestStore( {
-			target: 'backend/config'
+			target: '/backend/config'
 		});
 		console.log("Fetching all config...");
 		this.configStore.fetch( {
@@ -160,7 +160,7 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 		
 		// Sends the content of the Editors to the Backend and runs the Output in an iFrame
 		dojo.xhrPost({
-			"url": "backend/run",
+			"url": "/backend/run",
 			"content": request,
 			"handleAs": "json",
 			"load": dojo.hitch(this, function(response){

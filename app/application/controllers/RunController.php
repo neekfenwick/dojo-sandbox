@@ -152,8 +152,20 @@ class RunController extends Zend_Rest_Controller {
 		$session->id = rand(1,1000000);
 
 		echo Zend_Json::encode(array("id" => $session->id));*/
-    echo Zend_Json::encode(array("namespace" => $namespace,
-        "id" => $id, "version"=>$version));
+
+    /* To get the bucket running, we can either:
+     * 1/ return encoded info and let Frontend.js set the iframes src
+     * OR
+     * 2/ send a 302 Redirect and allow the app to init on startup from the URL
+     */
+    // XXX uncomment these two lines and comment out the _redirect() call to make
+    // XXX the app work again.
+    //echo Zend_Json::encode(array("namespace" => $namespace,
+    //    "id" => $id, "version"=>$version));
+    $redir_url = "/$namespace/$id/$version";
+    $logger->info("Sending redirect to ($redir_url)");
+    $this->_redirect($redir_url,
+        array( 'exit' => true));
 	}
 	
 	public function deleteAction() {}

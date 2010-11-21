@@ -8,13 +8,13 @@
  *          0 = load the sandbox.js custom build layer.
  */
 $debug = false;
-$lib_path = 'lib';
+$lib_path = '/lib';
 $dojo_path = $lib_path.'/dojo';
 $djConfig = '';
 $sandbox_path = '../sandbox';
 if (isset($_REQUEST['debug']) && $_REQUEST['debug'] == '1') {
   $debug = true;
-  $dojo_path = 'lib/dojo-release-1.5.0-src';
+  $dojo_path = '/lib/dojo-release-1.5.0-src';
   $sandbox_path = '../../sandbox';
   $djConfig = ', debug: true';
 }
