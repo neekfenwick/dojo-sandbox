@@ -131,6 +131,18 @@ class RunController extends Zend_Rest_Controller {
       // @TODO update the row in bucket_version with new data
       // Note - we do not increment bucket_version.version here.. that is done
       //  by a Save or Update action, not Run.
+      $where = array();
+      $where[] = $db->quoteInto('bucket_id = ?', $id); // sql-injection save quotation
+      $where[] = $db->quoteInto('bucket_namespace = ?', $namespace); // sql-injection save quotation
+      $where[] = $db->quoteInto('version = ?', $version); // sql-injection save quotation
+
+      $db->update('bucket_version', array(
+          'dojo_version' => $dojo_version,
+          'content_html' => $html,
+          'content_css' => $css,
+          'content_js' => $javascript,
+          'dj_config' => $dj_config),
+          $where);
     }
 
 /*		$session = new Zend_Session_Namespace("runIframe");
