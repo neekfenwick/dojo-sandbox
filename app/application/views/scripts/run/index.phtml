@@ -1,10 +1,10 @@
 <html>
 <head><title>Dojo sandbox</title>
-  <script type="text/javascript" src="/lib/dojo-release-1.5.0-src/dojo/dojo.js"
-          djConfig="parseOnLoad: true, debug: true"></script>
+  <script type="text/javascript" src="/lib/<?php echo $this->dojo_base_dir ?>/dojo/dojo.js"
+          djConfig="<?php echo $this->dj_config ?>"></script>
 
-  <link rel="stylesheet" href="/lib/dojo-release-1.5.0-src/dojo/resources/dojo.css">
-  <link rel="stylesheet" href="/lib/dojo-release-1.5.0-src/dijit/themes/claro/claro.css">
+  <link rel="stylesheet" href="/lib/<?php echo $this->dojo_base_dir ?>/dojo/resources/dojo.css">
+  <link rel="stylesheet" href="/lib/dojo-release-1.5.0-src/dijit/themes/<?php echo $this->dojo_theme ?>/<?php echo $this->dojo_theme ?>.css">
 
   <script type="text/javascript">
 	<?php
@@ -17,7 +17,7 @@
 	?>
   </style>
 </head>
-<body class="claro">
+<body class="<?php echo $this->dojo_theme ?>">
 <?php 
 	echo $this->html;
 ?>

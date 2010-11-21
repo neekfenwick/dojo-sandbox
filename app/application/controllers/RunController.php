@@ -33,6 +33,7 @@ class RunController extends Zend_Rest_Controller {
             ->where('namespace = ?', $namespace)
             ->where('id = ?', $id); // sql-injection save quotation
       $version = $db->fetchRow($select)->latest_version;
+      $logger->info("version not provided.. Fetched latest version ($version)");
     }
 
     $logger->info("index fetching bucket_version where namespace ($namespace) id ($id) version ($version)");
@@ -42,20 +43,27 @@ class RunController extends Zend_Rest_Controller {
           ->where('bucket_id = ?', $id)
           ->where('version = ?', $version);
     $version_data = $db->fetchRow($select);
+    $logger->info("html (" . $version_data->content_html . ")");
 
     /* Build response that will go into the iframe */
-
-    $response_src = "<html><head>";
-    // @TODO: build links here from bucket_resource
-
-    $response_src = "<style type='text/css'>\n" .
-      $version_data->content_js . "</style>\n";
-    $response_src = "<script type='text/javascript'>\n" .
-      $version_data->content_css . "</script>\n";
-
-    $response_src .= "</head><body>" . $version_data->content_html . "</body></html";
-
-    echo $response_src;
+//
+//    $response_src = "<html><head>";
+//    // @TODO: build links here from bucket_resource
+//
+//    $response_src = "<style type='text/css'>\n" .
+//      $version_data->content_js . "</style>\n";
+//    $response_src = "<script type='text/javascript'>\n" .
+//      $version_data->content_css . "</script>\n";
+//
+//    $response_src .= "</head><body>" . $version_data->content_html . "</body></html";
+//
+//    echo $response_src;
+    $this->view->javascript = $version_data->content_js;
+    $this->view->css = $version_data->content_css;
+    $this->view->html = $version_data->content_html;
+    $this->view->dj_config = $version_data->dj_config;
+    $this->view->dojo_base_dir = 'dojo-release-1.5.0-src'; // @TODO
+    $this->view->dojo_theme = 'claro';
 
 	}
 
@@ -69,7 +77,7 @@ class RunController extends Zend_Rest_Controller {
 
 		$namespace = $this->getRequest()->getParam("namespace");
 		$id = $this->getRequest()->getParam("id");
-    $version = 		$id = $this->getRequest()->getParam("id");
+    $version = $this->getRequest()->getParam("version");
     $logger->info("postAction namespace ($namespace) id ($id) version ($version)");
     if (!isset($version)) {
       $logger->info("version not provided, default to 0");
@@ -87,12 +95,11 @@ class RunController extends Zend_Rest_Controller {
 
     // ensure this sandbox exists
     $db = $this->_helper->database->getAdapter();
-    $logger->info('Running bucket count...');
+    $logger->info("Running bucket count for namespace ($namespace) id ($id)...");
 		$select = $db	->select()
 					->from('bucket', "COUNT(*) as cc")
 					->where('namespace = ?', $namespace)
-          ->where('id = ?', $id)
-          ->where('version = ?', $version); // sql-injection save quotation
+          ->where('id = ?', $id); // sql-injection save quotation
 
     if ($db->fetchRow($select)->cc == 0) {
       // sandbox does not yet exist, create it
