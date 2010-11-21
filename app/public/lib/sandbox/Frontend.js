@@ -5,6 +5,7 @@ dojo.require("dijit.layout.ContentPane");
 dojo.require("dijit.layout.BorderContainer");
 dojo.require("dijit.Toolbar");
 dojo.require("dijit.form.Button");
+dojo.require("dijit.form.Select");
 dojo.require("dojox.data.JsonRestStore");
 dojo.require("dijit.layout.TabContainer");
 dojo.require("dijit.form.SimpleTextarea");
@@ -14,7 +15,9 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache("sandbox", "templates/Frontend.html"),
 	_editors: [],
-	
+
+	_userInfo: undefined, // logged in user info
+
 	constructor: function(){
 		this._editors = [
 			{"id": "javascript", "containerNode": "centerLeftPane", "widget": null, "syntax": "js", "getValue": function(){}},
@@ -47,8 +50,26 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 		console.log("Fetching all config...");
 		this.configStore.fetch( {
 			query: { 'id': '*' },
-			onComplete: dojo.hitch(this, function(items) {
-				console.log("Do something with items: ", items);
+			onComplete: dojo.hitch(this, function(data) {
+				console.log("Do something with data: ", data);
+
+				dojo.forEach(data.items, dojo.hitch(this, function(item) {
+					if (this.configStore.getValue(item, "name") == "dojo_versions") {
+						console.log("Fill in versions: " + this.configStore.getValue(item, "value"));
+						var allVersions = this.configStore.getValue(item, "value");
+						dojo.forEach(allVersions.split('##'), dojo.hitch(this, function(v) {
+							console.log("Adding version: ", v);
+							this.versionSelect.addOption([
+								{
+									value: v,
+									label: v,
+									selected: true,
+									disabled: false
+								}
+							]);
+						}));
+					}
+				}));
 			})
 		});
 
@@ -119,7 +140,19 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 	
 	_runClick: function(){
 
+		// Figure out the identify of the sandbox being run
+		// Current url may be e.g. 'http://dojo-sandbox.net/public/1234'
+		var namespace = 'public'; // @TODO get from url
+		var id = '1234'; // @TODO get from url
+
+		// Collect data from the active sandbox
 		var request = {
+			"namespace": namespace,
+			"id": id,
+			"name": 'foobar',
+			"description": 'foodesc',
+			"dojo_version": this.versionSelect.get('value'),
+			"dj_config": this.djConfig.get('value'),
 			"html":  this._getEditorItem("html").getValue(),
 			"css":  this._getEditorItem("css").getValue(),
 			"javascript":  this._getEditorItem("javascript").getValue()
@@ -131,10 +164,14 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 			"content": request,
 			"handleAs": "json",
 			"load": dojo.hitch(this, function(response){
+				console.log("LOAD: ", response);
 				if(typeof(response.id) != "undefined"){
-					this.iframeRunNode.src = "backend/run/index/id/"+response.id;
+					this.iframeRunNode.src = "/backend/run/index/namespace/"+response.namespace + "/id/"+response.id;
 				}
-			})
+			}),
+			"error": function(response) {
+				console.log("ERROR: ", response, "..", response.responseText);
+			}
 		});
 		
 	}

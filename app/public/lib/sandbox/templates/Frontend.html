@@ -5,7 +5,16 @@
 			<div dojoType="dijit.form.Button" label="Save As New" dojoAttachEvent="onClick: _saveasnewClick"></div>
 			<div dojoType="dijit.form.Button" label="Delete" dojoAttachEvent="onClick: _deleteClick"></div>
 		</div>
-		<div dojoType="dijit.layout.ContentPane" region="left" style="width: 150px;">LEFT<br/>LEFT<br/>LEFT<br/>LEFT<br/></div>
+		<div dojoType="dijit.layout.ContentPane" region="left" style="width: 150px;">
+			<label class="leftLabel" for="versionSelect">Dojo Version:</label>
+			<div dojoType="dijit.form.Select" dojoAttachPoint="versionSelect"
+				 id="versionSelect"></div>
+
+			<label class="leftLabel" for="djConfig">djConfig:</label>
+			<div dojoType="dijit.form.TextBox" dojoAttachPoint="djConfig"
+				 id="djConfig"></div>
+
+		</div>
 		<div dojoType="dijit.layout.TabContainer" region="center" >
 			<div dojoType="dijit.layout.ContentPane" title="Develop">
 				<div dojoType="dijit.layout.BorderContainer" design="sidebar" style="border: none;">

@@ -53,14 +53,31 @@ should cause the script to look up bucket 1234, discover its latestVersion
 number, and issue a browser redirect to:
 http://dojo-paste.net/public/1234/4
 
+Resources
+---------
+
+A resource will be static data stored on our server and available as a direct
+URL call on our server.  The user may enter data (json, html, whatever) in a
+text entry dialog and store it as a name, e.g. "JSON/test.json".  All URLs must
+be relative to the bucket it belongs to.
+
+For example, the bucket
+http://dojo-paste.net/public/1234/4
+may have a resource available as:
+http://dojo-paste.net/public/1234/4/JSON/test.json
+
 Database Schema
 ---------------
 
 table users {
-  username TINYTEXT NOT NULL
+  username TINYTEXT NOT NULL,
+  first_name TINYTEXT NOT NULL,
+  last_name TINYTEXT NOT NULL,
+  email TINYTEXT NOT NULL,
+  primary key (username)
 }
 
-table buckets {
+table bucket {
   namespace TINYTEXT NOT NULL, -- fk to users.username
   id TINYTEXT NOT NULL, -- unique id of this bucket, in its namespace
   name TINYTEXT NOT NULL,
@@ -69,9 +86,9 @@ table buckets {
   primary key (namespace, id)
 }
 
-table bucket_versions {
-  namespace TINYTEXT NOT NULL, -- fk to users.username
-  id TINYTEXT NOT NULL, -- unique id of this bucket, in its namespace
+table bucket_version {
+  bucket_namespace TINYTEXT NOT NULL, -- fk to users.username
+  bucket_id TINYTEXT NOT NULL, -- unique id of this bucket, in its namespace
   version int NOT NULL,
   dojo_version TINYTEXT NOT NULL,
   resources TEXT NOT NULL, -- '##' separated resources
@@ -79,26 +96,37 @@ table bucket_versions {
   content_js TEXT NOT NULL,
   content_css TEXT NOT NULL,
   dj_config TEXT NOT NULL,
-  primary key (namespace, id)
+  primary key (bucket_namespace, bucket_id)
 }
 
--- TODO Think this through!
-table bucket_resources {
-  namespace TINYTEXT NOT NULL, -- fk to users.username
-  id TINYTEXT NOT NULL, -- unique id of this bucket, in its namespace
-  version int NOT NULL,
-  type TINYTEXT NOT NULL, -- 'html', 'json' .. umm, what?
-  name TINYTEXT NOT NULL, -- e.g. 'http://myserver.com/data.json'
-  primary key (namespace, id, version)
+table bucket_file {
+  id int NOT NULL AUTO_INCREMENT,
+  bucket_namespace TINYTEXT NOT NULL, -- fk to users.username
+  bucket_id TINYTEXT NOT NULL, -- unique id of this bucket, in its namespace
+  bucket_version int NOT NULL,
+  type TINYTEXT NOT NULL, -- 'html', 'json'.. used for Content-Type?
+  name TINYTEXT NOT NULL, -- e.g. 'JSON/test.json',
+  content TEXT NOT NULL,  -- the content of this resource
+  primary key (id)
+}
+
+table bucket_resource {
+  id int NOT NULL AUTO_INCREMENT,
+  bucket_namespace TINYTEXT NOT NULL, -- fk to users.username
+  bucket_id TINYTEXT NOT NULL, -- unique id of this bucket, in its namespace
+  bucket_version int NOT NULL,
+  type TINYTEXT NOT NULL, -- 'css'
+  href TINYTEXT NOT NULL, -- e.g. 'dojo/resources/dojo.css',
+  primary key (id)
 }
 
 Example Data
 ------------
 
-INSERT INTO buckets VALUES
+INSERT INTO bucket VALUES
 ( 'public', '1234', 'First bucket', 'long desc', 0);
 
-INSERT INTO bucket_versions VALUES
+INSERT INTO bucket_version VALUES
 ( 'public', '1234', 0, '1.5.0cdn', '/HTML/myWidget.html
 
 {
@@ -111,11 +139,21 @@ INSERT INTO bucket_versions VALUES
 						"version": 0,
 						"dojoVersion": "1.5.0cdn",
 						"resources": [
+							{
+								"type": "css",
+								"href": "dojo/resources/dojo.css"
+							},
+							{
+								"type": "css",
+								"href": "dijit/themes/dijit.css"
+							}
+						],
+						"files": [
 								{
-										"name": "/HTML/myWidget.html"
+										"name": "HTML/myWidget.html"
 								},
 								{
-										"name": "/JSON/myData.json"
+										"name": "JSON/myData.json"
 								}
 						],
 						"contentHtml": "<div></div>",
