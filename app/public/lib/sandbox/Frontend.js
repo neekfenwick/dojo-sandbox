@@ -106,28 +106,35 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 				this.updateUserinfoNode();
 
 				// inspect the location and see if we have to load a bucket
-				var matches;
-				console.log("Try to match pathname: ", window.location.pathname);
-				var namespace, id, version;
+				var pn = window.location.pathname;
 				var bucketRequest = dojo.mixin(this._userInfo, {});
-//				if (this._userInfo && this._userInfo.username) {
-//					bucketRequest.username = this._userInfo.username;
-//				}
-				if (matches = window.location.pathname.match(/^\/([^/]*)$/)) {
+
+				var re1 = new RegExp("^\/([^/]*)$");
+				var re2 = new RegExp("^\/([^/]*)\/([^/]*)$");
+				var re3 = new RegExp("^\/([^/]*)\/([^/]*)\/([0-9]*)$");
+				var matches = re1.exec(pn);
+				//var matches = pn.match(/^\/([^/]*)$/);
+				if (matches) {
 					// e.g. "/wuhi"
 					console.log("Matched just namespace: ", matches[1]);
 					// not sure what to do here .. list buckets?
-				} else if (matches = window.location.pathname.match(/^\/([^/]*)\/([^/]*)$/)) {
-					// e.g. "/wuhi/1234"
-					console.log("Matched namespace/id: ", matches[1], " - ", matches[2]);
-					namespace = matches[1], id = matches[2];
-					bucketRequest = { namespace: matches[1], id: matches[2] };
-				} else if (matches = window.location.pathname.match(/^\/([^/]*)\/([^/]*)\/([0-9]*)$/)) {
-					console.log("Matched namespace/id/version: ", matches[1], " - ", matches[2], " - ", matches[3]);
-					namespace = matches[1], id = matches[2], version = matches[3];
-					bucketRequest = { namespace: matches[1], id: matches[2], version: matches[3] };
+				} else {
+					matches = re2.exec(pn);
+					if (matches) {
+						// e.g. "/wuhi/1234"
+						console.log("Matched namespace/id: ", matches[1], " - ", matches[2]);
+						namespace = matches[1], id = matches[2];
+						bucketRequest = { namespace: matches[1], id: matches[2] };
+					} else {
+						matches = re3.exec(pn);
+						if (matches) {
+							console.log("Matched namespace/id/version: ", matches[1], " - ", matches[2], " - ", matches[3]);
+							namespace = matches[1], id = matches[2], version = matches[3];
+							bucketRequest = { namespace: matches[1], id: matches[2], version: matches[3] };
+						}
+					}
 				}
-
+				
 				dojo.xhrGet( {
 					url: '/backend/bucket',
 					content: bucketRequest,
