@@ -70,23 +70,116 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 						}));
 					}
 				}));
+
+				// cookie should have stored username of last logged on user
+				// If so, do a sync request to validate user.
+				// @TODO: make this non sync. for now, it's easier to do it sync.
+				var usercookie = dojo.cookie('dojo-sandbox');
+				if (usercookie) {
+					this._userInfo = dojo.objectFromQuery(usercookie);
+					console.log("userdata: ", this._userInfo);
+
+					if (this._userInfo && this._userInfo.username) {
+						dojo.xhrGet( {
+							url: '/backend/security',
+							sync: true,
+							content: {
+								action: 'validateToken',
+								username: this._userInfo.username,
+								token: this._userInfo.token
+							},
+							handleAs: 'json',
+							load: dojo.hitch(this, function(response) {
+								console.log("validateSecurity response: ", response);
+
+							}),
+							error: dojo.hitch(this, function(response) {
+								console.log("validateSecurity ERROR: ", response);
+								this._userInfo = undefined;
+							})
+						});
+					}
+				}
+
+				// At this point we may be logged in or not.
+				// Update the UI for our this._userInfo
+				this.updateUserinfoNode();
+
+				// inspect the location and see if we have to load a bucket
+				var matches;
+				console.log("Try to match pathname: ", window.location.pathname);
+				var namespace, id, version;
+				var bucketRequest = dojo.mixin(this._userInfo, {});
+//				if (this._userInfo && this._userInfo.username) {
+//					bucketRequest.username = this._userInfo.username;
+//				}
+				if (matches = window.location.pathname.match(/^\/([^/]*)$/)) {
+					// e.g. "/wuhi"
+					console.log("Matched just namespace: ", matches[1]);
+					// not sure what to do here .. list buckets?
+				} else if (matches = window.location.pathname.match(/^\/([^/]*)\/([^/]*)$/)) {
+					// e.g. "/wuhi/1234"
+					console.log("Matched namespace/id: ", matches[1], " - ", matches[2]);
+					namespace = matches[1], id = matches[2];
+					bucketRequest = { namespace: matches[1], id: matches[2] };
+				} else if (matches = window.location.pathname.match(/^\/([^/]*)\/([^/]*)\/([0-9]*)$/)) {
+					console.log("Matched namespace/id/version: ", matches[1], " - ", matches[2], " - ", matches[3]);
+					namespace = matches[1], id = matches[2], version = matches[3];
+					bucketRequest = { namespace: matches[1], id: matches[2], version: matches[3] };
+				}
+
+				dojo.xhrGet( {
+					url: '/backend/bucket',
+					content: bucketRequest,
+					handleAs: 'json',
+					load: dojo.hitch(this, function(response) {
+						console.log("bucket response: ", response);
+						var setValueFn = function(response, responseField, editor) {
+							editor.widget.setValue(response[responseField]);
+						};
+						var setValuePartial = dojo.partial(setValueFn, response);
+						dojo.forEach(this._editors, dojo.hitch(setValuePartial, function(editor) {
+							if (editor.id == 'html') {
+//								editor.widget.setValue(response.content_html);
+								this('content_html', editor);
+							} else if (editor.id == 'css') {
+//								editor.widget.setValue(response.content_css);
+								this('content_css', editor);
+							} else if (editor.id == 'javascript') {
+//								editor.widget.setValue(response.content_js);
+								this('content_js', editor);
+							}
+						}))
+					}),
+					error: dojo.hitch(this, function(response) {
+
+					})
+				});
 			})
 		});
 
-		// cookie should have stored username of last logged on user
-		// Perhaps chain this in the config onComplete handler?
-		var usercookie = dojo.cookie('dojo-sandbox');
-		if (usercookie) {
-			var userdata = dojo.objectFromQuery(usercookie);
-			console.log("userdata: ", userdata);
-
-			if (userdata && userdata.username) {
-				this.getUserDetails();
-			}
-		}
-
 	},
-	
+
+	updateUserinfoNode: function() {
+		dojo.empty(this.userInfoNode);
+		if (this._userInfo && this._userInfo.username) {
+			dojo.attr(this.userInfoNode, 'innerHTML',
+				'<span class="userinfo">Logged on as; <span class="username">' +
+					this._userInfo.username + "</span></span>");
+			var b = new dijit.form.Button( {
+				label: 'Logout',
+				onClick: dojo.hitch(this, "_logoutClick")
+			});
+			b.placeAt(this.userInfoNode);
+		} else {
+			var b = new dijit.form.Button( {
+				label: 'Login',
+				onClick: dojo.hitch(this, "_loginClick")
+			});
+			b.placeAt(this.userInfoNode);
+		}
+	},
+
 	setupEditors: function(){
 		dojo.forEach(this._editors, function(editor){
 			editor.widget = new dijit.form.SimpleTextarea({"style": "height: 100%; width: 100%;"});
@@ -123,8 +216,15 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 		// Request to backend for user details here
 	},
 
-
 	/* UI Response */
+
+	_loginClick: function() {
+
+	},
+
+	_logoutClick: function() {
+
+	},
 
 	_updateClick: function() {
 
@@ -165,9 +265,12 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 			"handleAs": "json",
 			"load": dojo.hitch(this, function(response){
 				console.log("LOAD: ", response);
-				if(typeof(response.id) != "undefined"){
-					this.iframeRunNode.src = "/backend/run/index/namespace/"+response.namespace + "/id/"+response.id;
-				}
+				// cannot have the 302 response cause a Redirect, so do this instead.
+				window.location = "/" + response.namespace + "/" + response.id +
+					"/" + response.version;
+//				if(typeof(response.id) != "undefined"){
+//					this.iframeRunNode.src = "/backend/run/index/namespace/"+response.namespace + "/id/"+response.id;
+//				}
 			}),
 			"error": function(response) {
 				console.log("ERROR: ", response, "..", response.responseText);

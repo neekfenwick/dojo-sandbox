@@ -158,14 +158,12 @@ class RunController extends Zend_Rest_Controller {
      * OR
      * 2/ send a 302 Redirect and allow the app to init on startup from the URL
      */
-    // XXX uncomment these two lines and comment out the _redirect() call to make
-    // XXX the app work again.
-    //echo Zend_Json::encode(array("namespace" => $namespace,
-    //    "id" => $id, "version"=>$version));
-    $redir_url = "/$namespace/$id/$version";
-    $logger->info("Sending redirect to ($redir_url)");
-    $this->_redirect($redir_url,
-        array( 'exit' => true));
+    echo Zend_Json::encode(array("namespace" => $namespace,
+        "id" => $id, "version"=>$version));
+//    $redir_url = "/$namespace/$id/$version";
+//    $logger->info("Sending redirect to ($redir_url)");
+//    $this->_redirect($redir_url,
+//        array( 'exit' => true, 'prependBase' => false));
 	}
 	
 	public function deleteAction() {}

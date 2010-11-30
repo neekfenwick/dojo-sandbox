@@ -1,9 +1,12 @@
 <div>
 	<div dojoType="dijit.layout.BorderContainer" gutters="false" dojoAttachPoint="mainBorderContainer" style="height: 100%; width: 100%;">
-		<div dojoType="dijit.Toolbar" region="top">
-			<div dojoType="dijit.form.Button" label="Update" dojoAttachEvent="onClick: _updateClick"></div>
-			<div dojoType="dijit.form.Button" label="Save As New" dojoAttachEvent="onClick: _saveasnewClick"></div>
-			<div dojoType="dijit.form.Button" label="Delete" dojoAttachEvent="onClick: _deleteClick"></div>
+		<div dojoType="dijit.layout.ContentPane" region="top">
+			<div dojoType="dijit.Toolbar">
+				<div dojoType="dijit.form.Button" label="Update" dojoAttachEvent="onClick: _updateClick"></div>
+				<div dojoType="dijit.form.Button" label="Save As New" dojoAttachEvent="onClick: _saveasnewClick"></div>
+				<div dojoType="dijit.form.Button" label="Delete" dojoAttachEvent="onClick: _deleteClick"></div>
+				<div dojoAttachPoint="userInfoNode" class="userInfoNode"></div>
+			</div>
 		</div>
 		<div dojoType="dijit.layout.ContentPane" region="left" style="width: 150px;">
 			<label class="leftLabel" for="versionSelect">Dojo Version:</label>
