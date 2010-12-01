@@ -16,6 +16,12 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 	templateString: dojo.cache("sandbox", "templates/Frontend.html"),
 	_editors: [],
 
+	_bucketInfo: {
+		namespace: undefined,
+		id: undefined,
+		version: undefined
+	},
+
 	_userInfo: undefined, // logged in user info
 
 	constructor: function(){
@@ -109,9 +115,9 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 				var pn = window.location.pathname;
 				var bucketRequest = dojo.mixin(this._userInfo, {});
 
-				var re1 = new RegExp("^\/([^/]*)$");
-				var re2 = new RegExp("^\/([^/]*)\/([^/]*)$");
-				var re3 = new RegExp("^\/([^/]*)\/([^/]*)\/([0-9]*)$");
+				var re1 = new RegExp("^\/([^/]+)$");
+				var re2 = new RegExp("^\/([^/]+)\/([^/]+)$");
+				var re3 = new RegExp("^\/([^/]+)\/([^/]+)\/([0-9]+)$");
 				var matches = re1.exec(pn);
 				//var matches = pn.match(/^\/([^/]*)$/);
 				if (matches) {
@@ -134,34 +140,47 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 						}
 					}
 				}
-				
-				dojo.xhrGet( {
-					url: '/backend/bucket',
-					content: bucketRequest,
-					handleAs: 'json',
-					load: dojo.hitch(this, function(response) {
-						console.log("bucket response: ", response);
-						var setValueFn = function(response, responseField, editor) {
-							editor.widget.setValue(response[responseField]);
-						};
-						var setValuePartial = dojo.partial(setValueFn, response);
-						dojo.forEach(this._editors, dojo.hitch(setValuePartial, function(editor) {
-							if (editor.id == 'html') {
-//								editor.widget.setValue(response.content_html);
-								this('content_html', editor);
-							} else if (editor.id == 'css') {
-//								editor.widget.setValue(response.content_css);
-								this('content_css', editor);
-							} else if (editor.id == 'javascript') {
-//								editor.widget.setValue(response.content_js);
-								this('content_js', editor);
-							}
-						}))
-					}),
-					error: dojo.hitch(this, function(response) {
 
-					})
-				});
+				if (bucketRequest && bucketRequest.namespace && bucketRequest.id && bucketRequest.version) {
+					console.log("Requesting: ", bucketRequest);
+
+					dojo.xhrGet( {
+						url: '/backend/bucket',
+						content: bucketRequest,
+						handleAs: 'json',
+						load: dojo.hitch(this, function(response) {
+							console.log("bucket response: ", response);
+							if (response.error && response.error === true) {
+								window.alert("Error from server! " + response.message);
+							} else {
+								this._bucketInfo = {
+									namespace: response.namespace,
+									id: response.id,
+									version: response.version
+								};
+								var setValueFn = function(response, responseField, editor) {
+									editor.widget.setValue(response[responseField]);
+								};
+								var setValuePartial = dojo.partial(setValueFn, response);
+								dojo.forEach(this._editors, dojo.hitch(setValuePartial, function(editor) {
+									if (editor.id == 'html') {
+		//								editor.widget.setValue(response.content_html);
+										this('content_html', editor);
+									} else if (editor.id == 'css') {
+		//								editor.widget.setValue(response.content_css);
+										this('content_css', editor);
+									} else if (editor.id == 'javascript') {
+		//								editor.widget.setValue(response.content_js);
+										this('content_js', editor);
+									}
+								}))
+							}
+						}),
+						error: dojo.hitch(this, function(response) {
+
+						})
+					});
+				}
 			})
 		});
 
@@ -169,17 +188,18 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 
 	updateUserinfoNode: function() {
 		dojo.empty(this.userInfoNode);
+		var b;
 		if (this._userInfo && this._userInfo.username) {
 			dojo.attr(this.userInfoNode, 'innerHTML',
 				'<span class="userinfo">Logged on as; <span class="username">' +
 					this._userInfo.username + "</span></span>");
-			var b = new dijit.form.Button( {
+			b = new dijit.form.Button( {
 				label: 'Logout',
 				onClick: dojo.hitch(this, "_logoutClick")
 			});
 			b.placeAt(this.userInfoNode);
 		} else {
-			var b = new dijit.form.Button( {
+			b = new dijit.form.Button( {
 				label: 'Login',
 				onClick: dojo.hitch(this, "_loginClick")
 			});
@@ -239,6 +259,32 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 
 	_saveasnewClick: function() {
 
+		// Collect data from the active sandbox
+		var request = this.gatherBucketData();
+		request.saveAsNew = true;
+
+		// Sends the content of the Editors to the Backend and runs the Output in an iFrame
+		dojo.xhrPost({
+			"url": "/backend/run",
+			"content": request,
+			"handleAs": "json",
+			"load": dojo.hitch(this, function(response){
+				console.log("saveAsNew load: ", response);
+//				// cannot have the 302 response cause a Redirect, so do this instead.
+				window.location = "/" + response.namespace + "/" + response.id +
+					"/" + response.version;
+//				this._bucketInfo = {
+//					namespace: response.namespace,
+//					id: response.id,
+//					version: response.version
+//				};
+//				this.refreshRunNode();
+			}),
+			"error": function(response) {
+				console.log("ERROR: ", response, "..", response.responseText);
+			}
+		});
+
 	},
 
 	_deleteClick: function() {
@@ -247,23 +293,8 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 	
 	_runClick: function(){
 
-		// Figure out the identify of the sandbox being run
-		// Current url may be e.g. 'http://dojo-sandbox.net/public/1234'
-		var namespace = 'public'; // @TODO get from url
-		var id = '1234'; // @TODO get from url
-
 		// Collect data from the active sandbox
-		var request = {
-			"namespace": namespace,
-			"id": id,
-			"name": 'foobar',
-			"description": 'foodesc',
-			"dojo_version": this.versionSelect.get('value'),
-			"dj_config": this.djConfig.get('value'),
-			"html":  this._getEditorItem("html").getValue(),
-			"css":  this._getEditorItem("css").getValue(),
-			"javascript":  this._getEditorItem("javascript").getValue()
-		};
+		var request = this.gatherBucketData()
 		
 		// Sends the content of the Editors to the Backend and runs the Output in an iFrame
 		dojo.xhrPost({
@@ -272,18 +303,48 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 			"handleAs": "json",
 			"load": dojo.hitch(this, function(response){
 				console.log("LOAD: ", response);
-				// cannot have the 302 response cause a Redirect, so do this instead.
-				window.location = "/" + response.namespace + "/" + response.id +
-					"/" + response.version;
-//				if(typeof(response.id) != "undefined"){
-//					this.iframeRunNode.src = "/backend/run/index/namespace/"+response.namespace + "/id/"+response.id;
-//				}
+//				// cannot have the 302 response cause a Redirect, so do this instead.
+//				window.location = "/" + response.namespace + "/" + response.id +
+//					"/" + response.version;
+				this._bucketInfo = {
+					namespace: response.namespace,
+					id: response.id,
+					version: response.version
+				};
+				this.refreshRunNode();
 			}),
 			"error": function(response) {
 				console.log("ERROR: ", response, "..", response.responseText);
 			}
 		});
 		
+	},
+
+	// Convenience method to gather a lump of data about the current bucket
+	//  for posting to the server.
+	gatherBucketData: function() {
+		return {
+			"namespace": this._bucketInfo.namespace || '',
+			"id": this._bucketInfo.id || '',
+			"version": this._bucketInfo.version || 0,
+			"name": 'foobar',
+			"description": 'foodesc',
+			"dojo_version": this.versionSelect.get('value'),
+			"dj_config": this.djConfig.get('value'),
+			"html":  this._getEditorItem("html").getValue(),
+			"css":  this._getEditorItem("css").getValue(),
+			"javascript":  this._getEditorItem("javascript").getValue()
+		};
+	},
+
+	// Update the Run iframe with a URL according to the current bucket info
+	refreshRunNode: function() {
+		if(typeof(this._bucketInfo.id) != "undefined"){
+			this.iframeRunNode.src = "/backend/run/index" +
+				"/namespace/"+this._bucketInfo.namespace +
+				"/id/"+this._bucketInfo.id +
+				"/version/"+this._bucketInfo.version;
+		}
 	}
 
 });

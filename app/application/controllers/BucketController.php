@@ -1,6 +1,8 @@
 <?php
 
-class BucketController extends Zend_Rest_Controller
+include_once('BaseController.php');
+
+class BucketController extends BaseController
 {
 	//	Test Array.
 	//	@TODO: use Database
@@ -15,21 +17,17 @@ class BucketController extends Zend_Rest_Controller
 
 	// Handle GET and return a list of resources
 	public function indexAction() {
-    echo "TODO: indexAction()"; // should return error code here.. or just not implement?
+    return self::getAction();
 	}
 
 	// Handle GET and return a specific resource item
 	public function getAction() {
 	
 		//@TODO: handle the query with $this->_getParam(...)
-		   $db = $this->_helper->database->getAdapter();
-    // @TODO: how do you log in zend?
-      $logger = new Zend_Log();
-      $writer = new Zend_Log_Writer_Stream('php://stderr');
-      $logger->addWriter($writer);
+    $db = $this->_helper->database->getAdapter();
     $namespace = $this->getRequest()->getParam("namespace");
     $id = $this->getRequest()->getParam("id");
-    $logger->info("index fetching bucket namespace ($namespace) id ($id)");
+    self::$logger->info("index fetching bucket namespace ($namespace) id ($id)");
 
     $select = $db->select()
           ->from('bucket', array('name', 'description', 'latest_version'))
@@ -41,27 +39,38 @@ class BucketController extends Zend_Rest_Controller
     $version = $this->getRequest()->getParam("version");
     if (!isset($version)) {
       $version = $bucket_data->latest_version;
-      $logger->info("version not provided.. Fetched latest version ($version)");
+      self::$logger->info("version not provided.. Fetched latest version ($version)");
     }
 
-    $logger->info("index fetching bucket_version where namespace ($namespace) id ($id) version ($version)");
+    self::$logger->info("index fetching bucket_version where namespace ($namespace) id ($id) version ($version)");
     $select = $db->select()
           ->from('bucket_version')
           ->where('bucket_namespace = ?', $namespace)
           ->where('bucket_id = ?', $id)
           ->where('version = ?', $version);
     $version_data = $db->fetchRow($select);
-    $logger->info("html (" . $version_data->content_html . ")");
 
-    $response_data = array(
-        'name' => $bucket_data->name,
-        'description' => $bucket_data->description,
-        'dojo_version' => $version_data->dojo_version,
-        'dj_config' => $version_data->dj_config,
-        'content_html' => $version_data->content_html,
-        'content_js' => $version_data->content_js,
-        'content_css' => $version_data->content_css
-    );
+    if ($version_data) {
+      self::$logger->info("html (" . $version_data->content_html . ")");
+
+      $response_data = array(
+          'namespace'    => $namespace,
+          'id'           => $id,
+          'version'      => $version,
+          'name'         => $bucket_data->name,
+          'description'  => $bucket_data->description,
+          'dojo_version' => $version_data->dojo_version,
+          'dj_config'    => $version_data->dj_config,
+          'content_html' => $version_data->content_html,
+          'content_js'   => $version_data->content_js,
+          'content_css'  => $version_data->content_css
+      );
+    } else {
+      // Want to return a 5xx error code here?
+      $response_data = array(
+          'error'   => true,
+          'message' => "The requested bucket did not exist (namespace ($namespace) id ($id) version ($version))");
+    }
 
 		echo Zend_Json::encode($response_data);
 	}

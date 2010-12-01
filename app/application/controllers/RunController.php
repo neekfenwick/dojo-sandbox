@@ -1,6 +1,8 @@
 <?php
 
-class RunController extends Zend_Rest_Controller {
+include_once('BaseController.php');
+
+class RunController extends BaseController {
 
   /*
    * Respond to e.g. /backend/run/index/namespace/public/id/1234/version/2
@@ -18,12 +20,12 @@ class RunController extends Zend_Rest_Controller {
 		}*/
     $db = $this->_helper->database->getAdapter();
     // @TODO: how do you log in zend?
-      $logger = new Zend_Log();
-      $writer = new Zend_Log_Writer_Stream('php://stderr');
-      $logger->addWriter($writer);
+//      self::$logger = new Zend_Log();
+//      $writer = new Zend_Log_Writer_Stream('php://stderr');
+//      self::$logger->addWriter($writer);
     $namespace = $this->getRequest()->getParam("namespace");
     $id = $this->getRequest()->getParam("id");
-    $logger->info("index fetching bucket namespace ($namespace) id ($id)");
+    self::$logger->info("index fetching bucket namespace ($namespace) id ($id)");
 
     // we may have been given a version number
     $version = $this->getRequest()->getParam("version");
@@ -33,31 +35,20 @@ class RunController extends Zend_Rest_Controller {
             ->where('namespace = ?', $namespace)
             ->where('id = ?', $id); // sql-injection save quotation
       $version = $db->fetchRow($select)->latest_version;
-      $logger->info("version not provided.. Fetched latest version ($version)");
+      self::$logger->info("version not provided.. Fetched latest version ($version)");
     }
 
-    $logger->info("index fetching bucket_version where namespace ($namespace) id ($id) version ($version)");
+    self::$logger->info("index fetching bucket_version where namespace ($namespace) id ($id) version ($version)");
     $select = $db	->select()
           ->from('bucket_version')
           ->where('bucket_namespace = ?', $namespace)
           ->where('bucket_id = ?', $id)
           ->where('version = ?', $version);
     $version_data = $db->fetchRow($select);
-    $logger->info("html (" . $version_data->content_html . ")");
+    self::$logger->info("html (" . $version_data->content_html . ")");
 
-    /* Build response that will go into the iframe */
-//
-//    $response_src = "<html><head>";
-//    // @TODO: build links here from bucket_resource
-//
-//    $response_src = "<style type='text/css'>\n" .
-//      $version_data->content_js . "</style>\n";
-//    $response_src = "<script type='text/javascript'>\n" .
-//      $version_data->content_css . "</script>\n";
-//
-//    $response_src .= "</head><body>" . $version_data->content_html . "</body></html";
-//
-//    echo $response_src;
+    /* Populate template parameters for the view */
+
     $this->view->javascript = $version_data->content_js;
     $this->view->css = $version_data->content_css;
     $this->view->html = $version_data->content_html;
@@ -69,18 +60,32 @@ class RunController extends Zend_Rest_Controller {
 
 	public function postAction(){
 		$this->_helper->viewRenderer->setNoRender(true);
-
-    // @TODO: how do you log in zend?
-      $logger = new Zend_Log();
-      $writer = new Zend_Log_Writer_Stream('php://stderr');
-      $logger->addWriter($writer);
+    $db = $this->_helper->database->getAdapter();
 
 		$namespace = $this->getRequest()->getParam("namespace");
 		$id = $this->getRequest()->getParam("id");
     $version = $this->getRequest()->getParam("version");
-    $logger->info("postAction namespace ($namespace) id ($id) version ($version)");
+    self::$logger->info("postAction namespace ($namespace) id ($id) version ($version)");
+    if (!isset($namespace) || $namespace == '') {
+      self::$logger->info("namespace not provided, default to 'public'");
+      $namespace = 'public';
+    }
+    if (!isset($id) || $id == '') {
+      self::$logger->info("id not provided, default to '1234'");
+//      $id = '1234'; // @TODO make me random
+      $accepted = false;
+      while (!$accepted) {
+        $id = substr(md5(uniqid(mt_rand(), true)), 0, 5);
+        $rs = $db->fetchRow($db->select()->from('bucket', 'COUNT(*) as count')
+            ->where('namespace', $namespace)
+            ->where('id', $id));
+        self::$logger->info("random id ($id) count " . $rs->count);
+        $accepted = ($rs->count == 0);
+      }
+      self::$logger->info("Accepted new id ($id)");
+    }
     if (!isset($version)) {
-      $logger->info("version not provided, default to 0");
+      self::$logger->info("version not provided, default to 0");
       $version = 0;
     }
 
@@ -94,8 +99,7 @@ class RunController extends Zend_Rest_Controller {
 		$css = $this->getRequest()->getParam("css");
 
     // ensure this sandbox exists
-    $db = $this->_helper->database->getAdapter();
-    $logger->info("Running bucket count for namespace ($namespace) id ($id)...");
+    self::$logger->info("Running bucket count for namespace ($namespace) id ($id)...");
 		$select = $db	->select()
 					->from('bucket', "COUNT(*) as cc")
 					->where('namespace = ?', $namespace)
@@ -103,7 +107,7 @@ class RunController extends Zend_Rest_Controller {
 
     if ($db->fetchRow($select)->cc == 0) {
       // sandbox does not yet exist, create it
-      $logger->info('bucket does not yet exist');
+      self::$logger->info('bucket does not yet exist');
       // Create the bucket
       $db->insert('bucket', array(
           'namespace' => $namespace,
@@ -113,7 +117,7 @@ class RunController extends Zend_Rest_Controller {
           'latest_version' => $version));
 //      $response = array('lastId' => $uniqueId);
       // Create the initial version
-      $logger->info("create bucket_version dojo_version ($dojo_version)");
+      self::$logger->info("create bucket_version dojo_version ($dojo_version)");
       $db->insert('bucket_version', array(
           'bucket_namespace' => $namespace,
           'bucket_id' => $id,
@@ -126,23 +130,37 @@ class RunController extends Zend_Rest_Controller {
 
     } else {
       // sandbox does exist
-      $logger->info('bucket does exist');
+      self::$logger->info('bucket does exist');
 
-      // @TODO update the row in bucket_version with new data
-      // Note - we do not increment bucket_version.version here.. that is done
-      //  by a Save or Update action, not Run.
-      $where = array();
-      $where[] = $db->quoteInto('bucket_id = ?', $id); // sql-injection save quotation
-      $where[] = $db->quoteInto('bucket_namespace = ?', $namespace); // sql-injection save quotation
-      $where[] = $db->quoteInto('version = ?', $version); // sql-injection save quotation
 
-      $db->update('bucket_version', array(
+      if (isset($_REQUEST['saveAsNew'])) {
+        $version ++;
+        self::$logger->info("saveAsNew version becomes ($version)");
+        $db->insert('bucket_version', array(
+          'bucket_namespace' => $namespace,
+          'bucket_id' => $id,
+          'version' => $version,
           'dojo_version' => $dojo_version,
           'content_html' => $html,
           'content_css' => $css,
           'content_js' => $javascript,
-          'dj_config' => $dj_config),
-          $where);
+          'dj_config' => $dj_config));
+      } else {
+
+        self::$logger->info("not saveAsNew, update existing version ($version)");
+        $where = array();
+        $where[] = $db->quoteInto('bucket_id = ?', $id); // sql-injection save quotation
+        $where[] = $db->quoteInto('bucket_namespace = ?', $namespace); // sql-injection save quotation
+        $where[] = $db->quoteInto('version = ?', $version); // sql-injection save quotation
+
+        $db->update('bucket_version', array(
+            'dojo_version' => $dojo_version,
+            'content_html' => $html,
+            'content_css' => $css,
+            'content_js' => $javascript,
+            'dj_config' => $dj_config),
+            $where);
+      }
     }
 
 /*		$session = new Zend_Session_Namespace("runIframe");
@@ -161,7 +179,7 @@ class RunController extends Zend_Rest_Controller {
     echo Zend_Json::encode(array("namespace" => $namespace,
         "id" => $id, "version"=>$version));
 //    $redir_url = "/$namespace/$id/$version";
-//    $logger->info("Sending redirect to ($redir_url)");
+//    self::$logger->info("Sending redirect to ($redir_url)");
 //    $this->_redirect($redir_url,
 //        array( 'exit' => true, 'prependBase' => false));
 	}
@@ -183,5 +201,5 @@ class RunController extends Zend_Rest_Controller {
 //
 //    echo $response_src;
   }
-    
+
 }

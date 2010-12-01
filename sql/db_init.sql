@@ -43,7 +43,7 @@ CREATE TABLE bucket_version (
   content_js TEXT NOT NULL,
   content_css TEXT NOT NULL,
   dj_config TEXT NOT NULL,
-  primary key (bucket_namespace, bucket_id)
+  primary key (bucket_namespace, bucket_id, version)
 ) ENGINE= MyISAM DEFAULT CHARSET = UTF8;
 
 -- bucket_file refers to file resources stored on our server and made available
