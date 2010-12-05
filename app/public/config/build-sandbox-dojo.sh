@@ -18,7 +18,11 @@ fi
 cp $COPYRIGHT .
 
 echo Calling build.sh in `pwd`
-./build.sh profile=../../../../../config/sandbox releaseName=dojo version=1.5.0-sandbox releaseDir=../../.. optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
+./build.sh profile=../../../../../config/sandbox releaseName=dojo-sandbox version=1.5.0-sandbox releaseDir=../../.. optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
+
+./build.sh profile=standard releaseName=dojo-1.5.0 version=1.5.0-standard releaseDir=../../.. optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
+
+./build.sh profile=standard releaseName=dojo-1.5.0-nooptimize version=1.5.0-standard-nooptimize releaseDir=../../.. optimize=none cssOptimize=none layerOptimize=none stripConsole=none action=clean,release
 
 popd
 echo Finished at `date`

@@ -158,6 +158,9 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 									id: response.id,
 									version: response.version
 								};
+								dojo.attr(this.bucketNamespaceNode, 'innerHTML', this._bucketInfo.namespace);
+								dojo.attr(this.bucketIdNode, 'innerHTML', this._bucketInfo.id);
+								dojo.attr(this.bucketVersionNode, 'innerHTML', this._bucketInfo.version);
 								var setValueFn = function(response, responseField, editor) {
 									editor.widget.setValue(response[responseField]);
 								};

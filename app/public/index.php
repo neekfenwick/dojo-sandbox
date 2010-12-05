@@ -9,12 +9,12 @@
  */
 $debug = false;
 $lib_path = '/lib';
-$dojo_path = $lib_path.'/dojo';
+$dojo_path = $lib_path.'/dojo-sandbox'; // our default sandbox profile 'build' dir
 $djConfig = '';
 $sandbox_path = '../sandbox';
 if (isset($_REQUEST['debug']) && $_REQUEST['debug'] == '1') {
   $debug = true;
-  $dojo_path = '/lib/dojo-release-1.5.0-src';
+  $dojo_path = '/lib/dojo-release-1.5.0-src'; // use the non-built dojo release
   $sandbox_path = '../../sandbox';
   $djConfig = ', debug: true';
 }

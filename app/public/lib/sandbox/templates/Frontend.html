@@ -8,12 +8,23 @@
 				<div dojoAttachPoint="userInfoNode" class="userInfoNode"></div>
 			</div>
 		</div>
-		<div dojoType="dijit.layout.ContentPane" region="left" style="width: 150px;">
+		<div dojoType="dijit.layout.ContentPane" region="left" style="width: 150px;"
+			 class="bucketInfo">
+			<h1>Your Bucket</h1>
+			<table class="bucketInfoTable"><tbody>
+				<tr><td class="infoLabel">Namespace:</span></td><td class="infoValue"><span dojoAttachPoint="bucketNamespaceNode"></span></td></tr>
+			<tr><td class="infoLabel">Id:</td><td class="infoValue"><span dojoAttachPoint="bucketIdNode"></span></td></tr>
+			<tr><td class="infoLabel">Version:</td><td class="infoValue"><span dojoAttachPoint="bucketVersionNode"></span></td></tr>
+			</tbody></table>
+
 			<label class="leftLabel" for="versionSelect">Dojo Version:</label>
+			<br/>
 			<div dojoType="dijit.form.Select" dojoAttachPoint="versionSelect"
 				 id="versionSelect"></div>
 
+			<br/>
 			<label class="leftLabel" for="djConfig">djConfig:</label>
+			<br/>
 			<div dojoType="dijit.form.TextBox" dojoAttachPoint="djConfig"
 				 id="djConfig"></div>
 

@@ -14,3 +14,21 @@ html, body, .frontend {
 	display: inline-block;
 	float: right;
 }
+
+.bucketInfo H1 {
+	text-align: center;
+	margin-top: 0;
+}
+.bucketInfo TABLE.bucketInfoTable {
+	border-collapse: collapse;
+}
+.bucketInfo .bucketInfoTable .infoLabel {
+	text-align: right;
+}
+.bucketInfo .infoLabel {
+	color: green;
+	padding-right: 0.5em;
+}
+.bucketInfo .infoLabel {
+	color: green;
+}

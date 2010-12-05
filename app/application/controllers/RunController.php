@@ -53,7 +53,16 @@ class RunController extends BaseController {
     $this->view->css = $version_data->content_css;
     $this->view->html = $version_data->content_html;
     $this->view->dj_config = $version_data->dj_config;
-    $this->view->dojo_base_dir = 'dojo-release-1.5.0-src'; // @TODO
+    switch ($version_data->dojo_version) {
+      case "1.5.0":
+        $this->view->dojo_base_dir = 'dojo-1.5.0'; // @TODO
+        break;
+      case "1.5.0-nooptimize":
+        $this->view->dojo_base_dir = 'dojo-1.5.0-nooptimize'; // @TODO
+        break;
+      default:
+        break;
+    };
     $this->view->dojo_theme = 'claro';
 
 	}

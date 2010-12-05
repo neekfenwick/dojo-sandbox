@@ -1,0 +1,10 @@
+The app/public/lib directory contains various dojo directories:
+
+dojo-release-1.5.0-src = the base dojo dir for our 1.5.0 support
+
+dojo-sandbox = the dojo library used by the sandbox application.  Fully optimized, and includes build layers specialised for the sandbox application.
+
+dojo-1.5.0 = the 'standard' profile built with full optimizations.  For use by buckets.
+
+dojo-1.5.0-nooptimize = the 'standard' profile build with no optimizations.  For use by buckets.
+

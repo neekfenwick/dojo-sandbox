@@ -6,7 +6,7 @@ class ConfigController extends Zend_Rest_Controller
 	//	@TODO: use Database
 	private $_items = array(
 			array("id" => "0", "name" => "theme",  "value" => "claro"), 
-			array("id" => "1", "name" => "dojo_versions",  "value" => "1.5.0")
+			array("id" => "1", "name" => "dojo_versions",  "value" => "1.5.0##1.5.0-nooptimize")
 		);
 	
 	public function init(){
