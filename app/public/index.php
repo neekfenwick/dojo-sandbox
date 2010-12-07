@@ -9,7 +9,7 @@
  */
 $debug = false;
 $lib_path = '/lib';
-$dojo_path = $lib_path.'/dojo-sandbox'; // our default sandbox profile 'build' dir
+$dojo_path = $lib_path.'/dojo-1.5.0-sandbox'; // our default sandbox profile 'build' dir
 $djConfig = '';
 $sandbox_path = '../sandbox';
 if (isset($_REQUEST['debug']) && $_REQUEST['debug'] == '1') {

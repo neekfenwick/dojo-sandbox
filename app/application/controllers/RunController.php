@@ -54,6 +54,12 @@ class RunController extends BaseController {
     $this->view->html = $version_data->content_html;
     $this->view->dj_config = $version_data->dj_config;
     switch ($version_data->dojo_version) {
+      case "1.4.3":
+        $this->view->dojo_base_dir = 'dojo-1.4.3'; // @TODO
+        break;
+      case "1.4.3-nooptimize":
+        $this->view->dojo_base_dir = 'dojo-1.4.3-nooptimize'; // @TODO
+        break;
       case "1.5.0":
         $this->view->dojo_base_dir = 'dojo-1.5.0'; // @TODO
         break;
