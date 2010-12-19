@@ -6,8 +6,10 @@ dojo.require("dijit.layout.BorderContainer");
 dojo.require("dijit.Toolbar");
 dojo.require("dijit.form.Button");
 dojo.require("dijit.form.Select");
+dojo.require("dijit.form.CheckBox");
 dojo.require("dojox.data.JsonRestStore");
 dojo.require("dijit.layout.TabContainer");
+dojo.require("dijit.form.Textarea");
 dojo.require("dijit.form.SimpleTextarea");
 
 dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
@@ -15,6 +17,9 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache("sandbox", "templates/Frontend.html"),
 	_editors: [],
+	_layersCBs: [], // array of checkboxes for layer selection
+
+	versionInfo: 'Alpha version',
 
 	_bucketInfo: {
 		namespace: undefined,
@@ -23,6 +28,18 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 	},
 
 	_userInfo: undefined, // logged in user info
+
+	attributeMap: {
+		versionInfo: {
+			node: 'versionInfoNode',
+			type: 'innerHTML'
+		}
+	},
+
+	// dummy for when we have i18n resource bundle
+	nlsString: {
+		STR_NOT_IMPLEMENTED: 'Not yet implemented'
+	},
 
 	constructor: function(){
 		this._editors = [
@@ -62,8 +79,8 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 				dojo.forEach(data.items, dojo.hitch(this, function(item) {
 					if (this.configStore.getValue(item, "name") == "dojo_versions") {
 						console.log("Fill in versions: " + this.configStore.getValue(item, "value"));
-						var allVersions = this.configStore.getValue(item, "value");
-						dojo.forEach(allVersions.split('##'), dojo.hitch(this, function(v) {
+						var allLayers = this.configStore.getValue(item, "value");
+						dojo.forEach(allLayers.split('##'), dojo.hitch(this, function(v) {
 							console.log("Adding version: ", v);
 							this.versionSelect.addOption([
 								{
@@ -73,6 +90,34 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 									disabled: false
 								}
 							]);
+						}));
+					} else if (this.configStore.getValue(item, "name") == "dojo_layers") {
+						console.log("Fill in layers: " + this.configStore.getValue(item, "value"));
+						var allLayers = this.configStore.getValue(item, "value");
+						dojo.forEach(allLayers.split('##'), dojo.hitch(this, function(v) {
+							// at the moment, we just get the full path to the layer
+							//  e.g. ../dojox/charting/widget/Chart2D.js
+							console.log("Adding layer: ", v);
+							//var shortName = v.match(//)
+							var re = /^.*\/(.*)\.js$/;
+							var ar = re.exec(v);
+							console.dir(ar);
+							var shortName = v;
+							if (ar.length > 1) {
+								shortName = ar[1];
+							}
+							var l = dojo.create('label', {
+								innerHTML: shortName,
+								title: v
+							});
+							dojo.place(l, this.layersContainer);
+							var cb = new dijit.form.CheckBox( {
+								layerName: v
+							});
+							cb.placeAt(this.layersContainer);
+							this._layersCBs.push(cb);
+
+							dojo.place(dojo.create('br'), this.layersContainer);
 						}));
 					}
 				}));
@@ -176,8 +221,13 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 		//								editor.widget.setValue(response.content_js);
 										this('content_js', editor);
 									}
-								}))
+								}));
+								this.djConfig.set('value', response.dj_config);
+								this.versionSelect.set('value', response.dojo_version);
+								this._djConfigChanged();
 							}
+
+							this.mainBorderContainer.resize();
 						}),
 						error: dojo.hitch(this, function(response) {
 
@@ -246,42 +296,69 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 		// Request to backend for user details here
 	},
 
+	_djConfigChanged: function(evt) {
+		var result = 'An unknown error ocurred';
+		try {
+			var p = dojo.fromJson('{' + this.djConfig.get('value') + '}');
+			result = '';
+			var elements = [];
+			for (var thing in p) {
+				elements.push(thing + ': ' + p[thing]);
+			}
+			result = elements.join(',<br>');
+			dojo.removeClass(this.djConfigParsed, 'djConfigError');
+		} catch(e) {
+			console.error("parse error: ", e);
+			console.dir(e);
+			result = e.name + ' - ' + e.message;
+			dojo.addClass(this.djConfigParsed, 'djConfigError');
+		}
+		dojo.attr(this.djConfigParsed, 'innerHTML', result);
+	},
+
 	/* UI Response */
 
 	_loginClick: function() {
-
+		alert(this.nlsString['STR_NOT_IMPLEMENTED']);
 	},
 
 	_logoutClick: function() {
-
+		alert(this.nlsString['STR_NOT_IMPLEMENTED']);
 	},
 
 	_updateClick: function() {
-
+		alert(this.nlsString['STR_NOT_IMPLEMENTED']);
 	},
 
 	_saveasnewClick: function() {
 
+		this.saveBucket({saveAsNew: true}, function(response) {
+			console.log("saveAsNew load: ", response);
+//				// cannot have the 302 response cause a Redirect, so do this instead.
+			window.location = "/" + response.namespace + "/" + response.id +
+				"/" + response.version;
+		});
+	},
+	_genericSaveHandler: function(response, handler) {
+		this._bucketInfo = {
+			namespace: response.namespace,
+			id: response.id,
+			version: response.version
+		};
+		handler.apply(this, [ response ])
+	},
+	saveBucket: function(mixinData, handler) {
 		// Collect data from the active sandbox
 		var request = this.gatherBucketData();
-		request.saveAsNew = true;
+		dojo.mixin(request, mixinData);
 
 		// Sends the content of the Editors to the Backend and runs the Output in an iFrame
 		dojo.xhrPost({
 			"url": "/backend/run",
 			"content": request,
 			"handleAs": "json",
-			"load": dojo.hitch(this, function(response){
-				console.log("saveAsNew load: ", response);
-//				// cannot have the 302 response cause a Redirect, so do this instead.
-				window.location = "/" + response.namespace + "/" + response.id +
-					"/" + response.version;
-//				this._bucketInfo = {
-//					namespace: response.namespace,
-//					id: response.id,
-//					version: response.version
-//				};
-//				this.refreshRunNode();
+			"load": dojo.hitch(this, function(response) {
+				this._genericSaveHandler(response, handler);
 			}),
 			"error": function(response) {
 				console.log("ERROR: ", response, "..", response.responseText);
@@ -291,13 +368,13 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 	},
 
 	_deleteClick: function() {
-
+		alert(this.nlsString['STR_NOT_IMPLEMENTED']);
 	},
 	
 	_runClick: function(){
 
 		// Collect data from the active sandbox
-		var request = this.gatherBucketData()
+		var request = this.gatherBucketData();
 		
 		// Sends the content of the Editors to the Backend and runs the Output in an iFrame
 		dojo.xhrPost({
@@ -323,9 +400,27 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 		
 	},
 
+	_launchClick: function() {
+		this.saveBucket({}, function(response) {
+			console.log("launchClick callback, response: ", response);
+			window.open(this.generateUrl());
+		});
+	},
+
 	// Convenience method to gather a lump of data about the current bucket
 	//  for posting to the server.
 	gatherBucketData: function() {
+		var layersAr = [];
+		// Gather enabled layers into an array to be join()ed later
+//		if (this.dijitLayerCB.get('checked') === true) {
+//			layersAr.push('dijit');
+//		}
+		dojo.forEach(this._layersCBs, function(cb) {
+			if (cb.get('checked') == true) {
+				layersAr.push(cb.layerName);
+			}
+		});
+		console.log("Made layersAr", layersAr);
 		return {
 			"namespace": this._bucketInfo.namespace || '',
 			"id": this._bucketInfo.id || '',
@@ -336,18 +431,24 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 			"dj_config": this.djConfig.get('value'),
 			"html":  this._getEditorItem("html").getValue(),
 			"css":  this._getEditorItem("css").getValue(),
-			"javascript":  this._getEditorItem("javascript").getValue()
+			"javascript":  this._getEditorItem("javascript").getValue(),
+			"layers": layersAr.join('##')
 		};
 	},
 
 	// Update the Run iframe with a URL according to the current bucket info
 	refreshRunNode: function() {
 		if(typeof(this._bucketInfo.id) != "undefined"){
-			this.iframeRunNode.src = "/backend/run/index" +
+			this.iframeRunNode.src = this.generateUrl();
+		}
+	},
+
+	generateUrl: function() {
+		console.log("generateUrl using this._bucketInfo: ", this._bucketInfo);
+		return "/backend/run/index" +
 				"/namespace/"+this._bucketInfo.namespace +
 				"/id/"+this._bucketInfo.id +
 				"/version/"+this._bucketInfo.version;
-		}
 	}
 
 });

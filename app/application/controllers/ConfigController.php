@@ -7,7 +7,9 @@ class ConfigController extends Zend_Rest_Controller
 	private $_items = array(
 			array("id" => "0", "name" => "theme",  "value" => "claro"),
       // dojo_versions - see RunController's use of dojo_version
-			array("id" => "1", "name" => "dojo_versions",  "value" => "1.4.3##1.4.3-nooptimize##1.5.0##1.5.0-nooptimize")
+			array("id" => "1", "name" => "dojo_versions",  "value" => "1.4.3##1.4.3-nooptimize##1.5.0##1.5.0-nooptimize"),
+      // dojo_layers - layers defined in 'standard' profile
+      array("id" => "2", "name" => "dojo_layers", "value" => "dijit/dijit-all.js##dojox/grid/DataGrid.js##dojox/gfx.js##dojox/charting/widget/Chart2D.js##dojox/dtl.js")
 		);
 	
 	public function init(){

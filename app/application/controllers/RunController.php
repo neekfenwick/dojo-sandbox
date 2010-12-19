@@ -27,16 +27,21 @@ class RunController extends BaseController {
     $id = $this->getRequest()->getParam("id");
     self::$logger->info("index fetching bucket namespace ($namespace) id ($id)");
 
+    // fetch overall bucket info
+    $select = $db	->select()
+          ->from('bucket', array('name', 'latest_version'))
+          ->where('namespace = ?', $namespace)
+          ->where('id = ?', $id);
+    $bucket_rs = $db->fetchRow($select);
+
     // we may have been given a version number
     $version = $this->getRequest()->getParam("version");
     if (!isset($version)) {
-      $select = $db	->select()
-            ->from('bucket', "latest_version")
-            ->where('namespace = ?', $namespace)
-            ->where('id = ?', $id); // sql-injection save quotation
-      $version = $db->fetchRow($select)->latest_version;
+      $version = $bucket_rs->latest_version;
       self::$logger->info("version not provided.. Fetched latest version ($version)");
     }
+
+    $name = $bucket_rs->name;
 
     self::$logger->info("index fetching bucket_version where namespace ($namespace) id ($id) version ($version)");
     $select = $db	->select()
@@ -49,10 +54,16 @@ class RunController extends BaseController {
 
     /* Populate template parameters for the view */
 
+    self::$logger->info("name ($name) - isset (" . isset($name) . ")");
+    if (!isset($name) || strlen($name) == 0) {
+      $name = 'Unnamed Sandbox ' . $namespace . '/' . $id . '/' . $version;
+    }
+    $this->view->name = $name;
     $this->view->javascript = $version_data->content_js;
     $this->view->css = $version_data->content_css;
     $this->view->html = $version_data->content_html;
     $this->view->dj_config = $version_data->dj_config;
+    $this->view->layers = $version_data->layers; // NB still ## separated
     switch ($version_data->dojo_version) {
       case "1.4.3":
         $this->view->dojo_base_dir = 'dojo-1.4.3'; // @TODO
@@ -112,6 +123,7 @@ class RunController extends BaseController {
     $html = $this->getRequest()->getParam("html");
 		$javascript = $this->getRequest()->getParam("javascript");
 		$css = $this->getRequest()->getParam("css");
+    $layers = $this->getRequest()->getParam("layers");
 
     // ensure this sandbox exists
     self::$logger->info("Running bucket count for namespace ($namespace) id ($id)...");
@@ -141,7 +153,8 @@ class RunController extends BaseController {
           'content_html' => $html,
           'content_css' => $css,
           'content_js' => $javascript,
-          'dj_config' => $dj_config));
+          'dj_config' => $dj_config,
+          'layers' => ''));
 
     } else {
       // sandbox does exist
@@ -159,7 +172,8 @@ class RunController extends BaseController {
           'content_html' => $html,
           'content_css' => $css,
           'content_js' => $javascript,
-          'dj_config' => $dj_config));
+          'dj_config' => $dj_config,
+          'layers' => $layers));
       } else {
 
         self::$logger->info("not saveAsNew, update existing version ($version)");
@@ -173,7 +187,8 @@ class RunController extends BaseController {
             'content_html' => $html,
             'content_css' => $css,
             'content_js' => $javascript,
-            'dj_config' => $dj_config),
+            'dj_config' => $dj_config,
+            'layers' => $layers),
             $where);
       }
     }

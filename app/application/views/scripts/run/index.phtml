@@ -1,22 +1,30 @@
 <html>
-<head><title>Dojo sandbox</title>
+<head><title><?php echo $this->name ?></title>
   <script type="text/javascript" src="/lib/<?php echo $this->dojo_base_dir ?>/dojo/dojo.js"
           djConfig="<?php echo $this->dj_config ?>"></script>
+<?php
+if (isset($this->layers)) {
+  $layersAr = preg_split('/##/', $this->layers);
+  foreach ($layersAr as $layerName) {
+    echo '  <script type="text/javascript" ' .
+      'src="/lib/' . $this->dojo_base_dir . '/' . $layerName . '"></script>' . "\n";
+  }
+}
+?>
 
   <link rel="stylesheet" href="/lib/<?php echo $this->dojo_base_dir ?>/dojo/resources/dojo.css">
   <link rel="stylesheet" href="/lib/dojo-release-1.5.0-src/dijit/themes/<?php echo $this->dojo_theme ?>/<?php echo $this->dojo_theme ?>.css">
 
+<?php if (isset($this->javascript) && strlen($this->javascript) > 0) { ?>
   <script type="text/javascript">
-	<?php
-		echo $this->javascript;
-	?>
+<?php echo $this->javascript . "\n";?>
   </script>
+<?php }
+if (isset($this->css) && strlen($this->css) > 0) { ?>
   <style type="text/css">
-	<?php
-		echo $this->css;
-	?>
+<?php echo $this->css . "\n"; ?>
   </style>
-</head>
+<?php } ?></head>
 <body class="<?php echo $this->dojo_theme ?>">
 <?php 
 	echo $this->html;

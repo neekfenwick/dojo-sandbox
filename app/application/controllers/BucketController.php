@@ -61,6 +61,7 @@ class BucketController extends BaseController
           'description'  => $bucket_data->description,
           'dojo_version' => $version_data->dojo_version,
           'dj_config'    => $version_data->dj_config,
+          'layers'       => $version_data->layers,
           'content_html' => $version_data->content_html,
           'content_js'   => $version_data->content_js,
           'content_css'  => $version_data->content_css

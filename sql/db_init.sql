@@ -43,8 +43,11 @@ CREATE TABLE bucket_version (
   content_js TEXT NOT NULL,
   content_css TEXT NOT NULL,
   dj_config TEXT NOT NULL,
+  layers TEXT NOT NULL,                  -- '##' separated layer names
   primary key (bucket_namespace, bucket_id, version)
 ) ENGINE= MyISAM DEFAULT CHARSET = UTF8;
+
+alter table bucket_version add column layers TEXT not null;
 
 -- bucket_file refers to file resources stored on our server and made available
 -- to each bucket by a url like http://dojo-sandbox.net/public/1234/1/JSON/test.json

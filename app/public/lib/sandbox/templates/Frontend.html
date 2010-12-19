@@ -5,11 +5,13 @@
 				<div dojoType="dijit.form.Button" label="Update" dojoAttachEvent="onClick: _updateClick"></div>
 				<div dojoType="dijit.form.Button" label="Save As New" dojoAttachEvent="onClick: _saveasnewClick"></div>
 				<div dojoType="dijit.form.Button" label="Delete" dojoAttachEvent="onClick: _deleteClick"></div>
+				<div class="versionInfo"><span dojoAttachPoint="versionInfoNode"></span></div>
 				<div dojoAttachPoint="userInfoNode" class="userInfoNode"></div>
 			</div>
 		</div>
-		<div dojoType="dijit.layout.ContentPane" region="left" style="width: 150px;"
+		<div dojoType="dijit.layout.ContentPane" region="left" splitter="true" style="width: 150px;"
 			 class="bucketInfo">
+			<div dojoType="dijit.layout.ContentPane">
 			<h1>Your Bucket</h1>
 			<table class="bucketInfoTable"><tbody>
 				<tr><td class="infoLabel">Namespace:</span></td><td class="infoValue"><span dojoAttachPoint="bucketNamespaceNode"></span></td></tr>
@@ -20,14 +22,25 @@
 			<label class="leftLabel" for="versionSelect">Dojo Version:</label>
 			<br/>
 			<div dojoType="dijit.form.Select" dojoAttachPoint="versionSelect"
-				 id="versionSelect"></div>
-
+				 id="versionSelect" style="width: 100%"></div>
 			<br/>
+			<fieldset dojoAttachPoint="layersContainer"><legend>Layers</legend>
+			</fieldset>
+
 			<label class="leftLabel" for="djConfig">djConfig:</label>
 			<br/>
-			<div dojoType="dijit.form.TextBox" dojoAttachPoint="djConfig"
-				 id="djConfig"></div>
-
+			<div dojoType="dijit.form.Textarea" dojoAttachPoint="djConfig"
+				 id="djConfig" class="djConfigArea" style="width: 100%"
+				 dojoAttachEvent="onKeyUp: _djConfigChanged"></div>
+			<br/>
+			<div dojoType="dijit.layout.ContentPane">
+				<span class="leftLabel">Parsed djConfig:</span>
+				<div class="djConfigParsed" dojoAttachPoint="djConfigParsed"></div>
+			</div>
+			<div dojoType="dijit.form.Button" label="Launch for Debug"
+				 dojoAttachEvent="onClick: _launchClick"
+				 title="Open a new window containing this bucket, for easy script debugging."></div>
+			</div>
 		</div>
 		<div dojoType="dijit.layout.TabContainer" region="center" >
 			<div dojoType="dijit.layout.ContentPane" title="Develop">
