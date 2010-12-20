@@ -77,9 +77,10 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 				console.log("Do something with data: ", data);
 
 				dojo.forEach(data.items, dojo.hitch(this, function(item) {
+					var allLayers;
 					if (this.configStore.getValue(item, "name") == "dojo_versions") {
 						console.log("Fill in versions: " + this.configStore.getValue(item, "value"));
-						var allLayers = this.configStore.getValue(item, "value");
+						allLayers = this.configStore.getValue(item, "value");
 						dojo.forEach(allLayers.split('##'), dojo.hitch(this, function(v) {
 							console.log("Adding version: ", v);
 							this.versionSelect.addOption([
@@ -93,7 +94,7 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 						}));
 					} else if (this.configStore.getValue(item, "name") == "dojo_layers") {
 						console.log("Fill in layers: " + this.configStore.getValue(item, "value"));
-						var allLayers = this.configStore.getValue(item, "value");
+						allLayers = this.configStore.getValue(item, "value");
 						dojo.forEach(allLayers.split('##'), dojo.hitch(this, function(v) {
 							// at the moment, we just get the full path to the layer
 							//  e.g. ../dojox/charting/widget/Chart2D.js
@@ -106,12 +107,15 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 							if (ar.length > 1) {
 								shortName = ar[1];
 							}
+							// Build as a label and checkbox.. could build table?
 							var l = dojo.create('label', {
+								'class': 'layerName',
 								innerHTML: shortName,
 								title: v
 							});
 							dojo.place(l, this.layersContainer);
 							var cb = new dijit.form.CheckBox( {
+								'class': 'layerCheckBox',
 								layerName: v
 							});
 							cb.placeAt(this.layersContainer);
@@ -225,12 +229,21 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 								this.djConfig.set('value', response.dj_config);
 								this.versionSelect.set('value', response.dojo_version);
 								this._djConfigChanged();
+								// Check all layerCBs with names matching those for this bucket.
+								// Presume all CBs are unchecked to begin with.
+								dojo.forEach(response.layers.split("##"), dojo.hitch(this, dojo.hitch(this, function(layerName) {
+									dojo.forEach(this._layersCBs, dojo.hitch(this, function(cb) {
+										if (cb.layerName == layerName) {
+											cb.set('checked', true);
+										}
+									}));
+								})));
 							}
 
 							this.mainBorderContainer.resize();
 						}),
 						error: dojo.hitch(this, function(response) {
-
+							console.error("ERROR loading bucket: ", response);
 						})
 					});
 				}
@@ -286,9 +299,7 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 	
 	_getEditorItem:function(id){
 		return dojo.filter(this._editors, function(editor){
-			if(editor.id == id){
-				return editor;
-			}
+			return (editor.id == id) ? editor : undefined;
 		})[0];
 	},
 

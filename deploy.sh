@@ -9,4 +9,4 @@ fi
 
 # rsync to remote server, avoiding copying the
 #  configs which are platform specific.
-rsync --recursive --verbose --compress --exclude=app/application/configs app sandbox@dojo-sandbox.net:/var/www/sandbox
+rsync --recursive --update --verbose --compress --exclude=app/application/configs app sandbox@dojo-sandbox.net:/var/www/sandbox

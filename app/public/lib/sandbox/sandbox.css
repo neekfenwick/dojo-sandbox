@@ -54,3 +54,7 @@ html, body, .frontend {
 	border: 1px solid black;
 	padding: 0 0 2px 2px;
 }
+.bucketInfo .layerName {
+	display: inline-block;
+	width: 8em;
+}

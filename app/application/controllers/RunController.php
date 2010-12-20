@@ -124,6 +124,7 @@ class RunController extends BaseController {
 		$javascript = $this->getRequest()->getParam("javascript");
 		$css = $this->getRequest()->getParam("css");
     $layers = $this->getRequest()->getParam("layers");
+    self::$logger->info("XXX layers ($layers)");
 
     // ensure this sandbox exists
     self::$logger->info("Running bucket count for namespace ($namespace) id ($id)...");
@@ -154,7 +155,7 @@ class RunController extends BaseController {
           'content_css' => $css,
           'content_js' => $javascript,
           'dj_config' => $dj_config,
-          'layers' => ''));
+          'layers' => $layers));
 
     } else {
       // sandbox does exist
