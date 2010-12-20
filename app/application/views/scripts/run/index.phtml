@@ -6,6 +6,13 @@
 if (isset($this->layers)) {
   $layersAr = preg_split('/##/', $this->layers);
   foreach ($layersAr as $layerName) {
+    // @TODO: improve our knowledge of 'layers', as some have dependencies.
+    // dijit-all.js has a layerDependency on dijit/dijit.js
+    if (strpos($layerName, 'dijit-all.js') > 0) {
+      echo '  <!-- auto-inserted dijit.js dependency to satisfy dijit-all.js -->' . "\n" .
+        '  <script type="text/javascript" ' .
+        'src="/lib/' . $this->dojo_base_dir . '/dijit/dijit.js"></script>' . "\n";
+    }
     echo '  <script type="text/javascript" ' .
       'src="/lib/' . $this->dojo_base_dir . '/' . $layerName . '"></script>' . "\n";
   }
@@ -13,7 +20,7 @@ if (isset($this->layers)) {
 ?>
 
   <link rel="stylesheet" href="/lib/<?php echo $this->dojo_base_dir ?>/dojo/resources/dojo.css">
-  <link rel="stylesheet" href="/lib/dojo-release-1.5.0-src/dijit/themes/<?php echo $this->dojo_theme ?>/<?php echo $this->dojo_theme ?>.css">
+  <link rel="stylesheet" href="/lib/<?php echo $this->dojo_base_dir ?>/dijit/themes/<?php echo $this->dojo_theme ?>/<?php echo $this->dojo_theme ?>.css">
 
 <?php if (isset($this->javascript) && strlen($this->javascript) > 0) { ?>
   <script type="text/javascript">
