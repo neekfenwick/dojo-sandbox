@@ -115,7 +115,7 @@ class RunController extends BaseController {
       $version = 0;
     }
 
-    // retrieve the guts of the sandbox
+    // retrieve the guts of the bucket
     $name = $this->getRequest()->getParam("name");
     $description = $this->getRequest()->getParam("description");
     $dojo_version = $this->getRequest()->getParam("dojo_version");
@@ -124,7 +124,15 @@ class RunController extends BaseController {
 		$javascript = $this->getRequest()->getParam("javascript");
 		$css = $this->getRequest()->getParam("css");
     $layers = $this->getRequest()->getParam("layers");
-    self::$logger->info("XXX layers ($layers)");
+
+    // prepare the guts of the bucket, used in each kind of insert/update later
+    $bucket_contents = array(
+      'dojo_version' => $dojo_version,
+      'content_html' => $html,
+      'content_css' => $css,
+      'content_js' => $javascript,
+      'dj_config' => $dj_config,
+      'layers' => $layers);
 
     // ensure this sandbox exists
     self::$logger->info("Running bucket count for namespace ($namespace) id ($id)...");
@@ -146,16 +154,12 @@ class RunController extends BaseController {
 //      $response = array('lastId' => $uniqueId);
       // Create the initial version
       self::$logger->info("create bucket_version dojo_version ($dojo_version)");
-      $db->insert('bucket_version', array(
-          'bucket_namespace' => $namespace,
-          'bucket_id' => $id,
-          'version' => 0,
-          'dojo_version' => $dojo_version,
-          'content_html' => $html,
-          'content_css' => $css,
-          'content_js' => $javascript,
-          'dj_config' => $dj_config,
-          'layers' => $layers));
+      $db->insert('bucket_version', array_merge(
+          array(
+            'bucket_namespace' => $namespace,
+            'bucket_id' => $id,
+            'version' => 0),
+          $bucket_contents));
 
     } else {
       // sandbox does exist
@@ -165,16 +169,12 @@ class RunController extends BaseController {
       if (isset($_REQUEST['saveAsNew'])) {
         $version ++;
         self::$logger->info("saveAsNew version becomes ($version)");
-        $db->insert('bucket_version', array(
-          'bucket_namespace' => $namespace,
-          'bucket_id' => $id,
-          'version' => $version,
-          'dojo_version' => $dojo_version,
-          'content_html' => $html,
-          'content_css' => $css,
-          'content_js' => $javascript,
-          'dj_config' => $dj_config,
-          'layers' => $layers));
+        $db->insert('bucket_version', array_merge(
+            array(
+              'bucket_namespace' => $namespace,
+              'bucket_id' => $id,
+              'version' => $version),
+            $bucket_contents));
       } else {
 
         self::$logger->info("not saveAsNew, update existing version ($version)");
@@ -183,14 +183,7 @@ class RunController extends BaseController {
         $where[] = $db->quoteInto('bucket_namespace = ?', $namespace); // sql-injection save quotation
         $where[] = $db->quoteInto('version = ?', $version); // sql-injection save quotation
 
-        $db->update('bucket_version', array(
-            'dojo_version' => $dojo_version,
-            'content_html' => $html,
-            'content_css' => $css,
-            'content_js' => $javascript,
-            'dj_config' => $dj_config,
-            'layers' => $layers),
-            $where);
+        $db->update('bucket_version', $bucket_contents, $where);
       }
     }
 
