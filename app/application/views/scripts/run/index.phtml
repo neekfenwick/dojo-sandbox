@@ -1,9 +1,9 @@
 <html>
 <head><title><?php echo $this->name ?></title>
-  <script type="text/javascript" src="/lib/<?php echo $this->dojo_base_dir ?>/dojo/dojo.js"
-          djConfig="<?php echo $this->dj_config ?>"></script>
+  <script type="text/javascript" src="/lib/<?php echo $this->dojo_base_dir ?>/dojo/dojo.js"<?php
+  if (isset($this->dj_config) && strlen($this->dj_config) > 0) echo 'djConfig="' . $this->dj_config . '"'?>></script>
 <?php
-if (isset($this->layers)) {
+if (isset($this->layers) && strlen($this->layers) > 0) {
   $layersAr = preg_split('/##/', $this->layers);
   foreach ($layersAr as $layerName) {
     // @TODO: improve our knowledge of 'layers', as some have dependencies.
