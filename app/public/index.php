@@ -24,7 +24,8 @@ $no_sandbox_layer = (isset($_REQUEST['nosandboxlayer']) && $_REQUEST['nosandboxl
 ?>
 <html>
 <head><title>Dojo sandbox</title>
-  <script type="text/javascript" src="<?php echo $lib_path; ?>/edit_area/edit_area_full.js"></script>
+  <script src="<?php echo $lib_path; ?>/codemirror/js/codemirror.js" type="text/javascript"></script>
+  <script src="<?php echo $lib_path; ?>/vital/jsbeautify.js" type="text/javascript"></script>
   <script type="text/javascript" src="<?php echo $dojo_path; ?>/dojo/dojo.js"
           djConfig="parseOnLoad: true<?php echo $djConfig; ?>"></script>
 <?php if (!$no_dojodeps_layer) { ?>
