@@ -4,8 +4,14 @@ RewriteEngine on
 
 # Data file support
 #RewriteCond %{REQUEST_URI}
- RewriteRule run/index/namespace/([A-Za-z0-9]+)/id/([A-Za-z0-9]+)/version/([A-Za-z0-9]+\.(xml|html|json))$ index.php?controller=file&action=get&namespace=$1&id=$2&file=$3 [L]
+# RewriteRule run/index/namespace/([A-Za-z0-9]+)/id/([A-Za-z0-9]+)/version/([A-Za-z0-9]+\.(xml|html|json))$ index.php?controller=file&action=get&namespace=$1&id=$2&file=$3 [L]
 #RewriteRule run/index/namespace/([A-Za-z0-9]+)/id/([A-Za-z0-9]+)/version/([A-Za-z0-9]+\.(xml|html|json))$ data.php?test1=$1&test2=$2 [L]
+
+# Data file support
+# from http://www.dojo-sandbox.net/backend/run/index/namespace/public/id/b5ec8/version/test.json
+# to http://www.dojo-sandbox.net/backend/index.php?controller=file&action=get&namespace=public&id=b5ec8&file=test.json
+#
+RewriteRule ^run/index/namespace/([A-Za-z0-9]+)/id/([A-Za-z0-9]+)/version/([A-Za-z0-9]+\.(xml|html|json))/?$ /backend/index.php?controller=file&action=get&namespace=$1&id=$2&file=$3 [R=301,NC,L]
 
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
