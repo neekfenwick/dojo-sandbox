@@ -158,7 +158,7 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 
 				// At this point we may be logged in or not.
 				// Update the UI for our this._userInfo
-				this.updateUserinfoNode();
+				this._updateUserinfoNode();
 
 				// inspect the location and see if we have to load a bucket
 				var pn = window.location.pathname;
@@ -207,22 +207,21 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 									id: response.id,
 									version: response.version
 								};
-								dojo.attr(this.bucketNamespaceNode, 'innerHTML', this._bucketInfo.namespace);
-								dojo.attr(this.bucketIdNode, 'innerHTML', this._bucketInfo.id);
-								dojo.attr(this.bucketVersionNode, 'innerHTML', this._bucketInfo.version);
+								this._updateBucketInfoNodes();
+
 								var setValueFn = function(response, responseField, editor) {
 									editor.widget.setValue(response[responseField]);
 								};
 								var setValuePartial = dojo.partial(setValueFn, response);
 								dojo.forEach(this._editors, dojo.hitch(setValuePartial, function(editor) {
 									if (editor.id == 'html') {
-		//								editor.widget.setValue(response.content_html);
+						//								editor.widget.setValue(response.content_html);
 										this('content_html', editor);
 									} else if (editor.id == 'css') {
-		//								editor.widget.setValue(response.content_css);
+						//								editor.widget.setValue(response.content_css);
 										this('content_css', editor);
 									} else if (editor.id == 'javascript') {
-		//								editor.widget.setValue(response.content_js);
+						//								editor.widget.setValue(response.content_js);
 										this('content_js', editor);
 									}
 								}));
@@ -252,7 +251,7 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 
 	},
 
-	updateUserinfoNode: function() {
+	_updateUserinfoNode: function() {
 		dojo.empty(this.userInfoNode);
 		var b;
 		if (this._userInfo && this._userInfo.username) {
@@ -271,6 +270,12 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 			});
 			b.placeAt(this.userInfoNode);
 		}
+	},
+
+	_updateBucketInfoNodes: function() {
+		dojo.attr(this.bucketNamespaceNode, 'innerHTML', this._bucketInfo.namespace);
+		dojo.attr(this.bucketIdNode, 'innerHTML', this._bucketInfo.id);
+		dojo.attr(this.bucketVersionNode, 'innerHTML', this._bucketInfo.version);
 	},
 
 	setupEditors: function(){
@@ -402,10 +407,15 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 					id: response.id,
 					version: response.version
 				};
+				this._updateBucketInfoNodes();
 				this.refreshRunNode();
 			}),
 			"error": function(response) {
-				console.log("ERROR: ", response, "..", response.responseText);
+				if (response) {
+					console.error("ERROR: ", response, "..", response.responseText);
+				} else {
+					console.error("ERROR! arguments: ", arguments);
+				}
 			}
 		});
 		
