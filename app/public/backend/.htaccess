@@ -1,7 +1,13 @@
-SetEnv APPLICATION_ENV development      
-	
+SetEnv APPLICATION_ENV development
+
 RewriteEngine on
+
+# Data file support
+#RewriteCond %{REQUEST_URI}
+ RewriteRule run/index/namespace/([A-Za-z0-9]+)/id/([A-Za-z0-9]+)/version/([A-Za-z0-9]+\.(xml|html|json))$ index.php?controller=file&action=get&namespace=$1&id=$2&file=$3 [L]
+#RewriteRule run/index/namespace/([A-Za-z0-9]+)/id/([A-Za-z0-9]+)/version/([A-Za-z0-9]+\.(xml|html|json))$ data.php?test1=$1&test2=$2 [L]
+
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule .* - [L]
-RewriteRule !.(js|ico|gif|jpg|png|css)$ index.php  
+RewriteRule !.(js|ico|gif|jpg|png|css)$ index.php
