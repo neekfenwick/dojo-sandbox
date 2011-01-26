@@ -9,8 +9,6 @@ dojo.require("dijit.form.Select");
 dojo.require("dijit.form.CheckBox");
 dojo.require("dojox.data.JsonRestStore");
 dojo.require("dijit.layout.TabContainer");
-dojo.require("dijit.form.Textarea");
-dojo.require("dijit.form.SimpleTextarea");
 dojo.require("dijit.form.DropDownButton");
 dojo.require("dojox.html.format");
 
@@ -44,62 +42,60 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 	nlsString: {
 		STR_NOT_IMPLEMENTED: 'Not yet implemented'
 	},
+	_editorMixin: {
+		"initialized": false,
+		"baseNode": null,
+		"widget": null,
+		"getValue": function () {
+			return this.widget.getCode();
+		},
+		"setValue": function (value) {	
+			if(this.initialized == false){
+				this._valueToInit = value;
+			}else{
+				this.widget.setCode(value);
+			}
+		},
+		"onInit": function(){
+			this.setValue(this._valueToInit);
+		},
+		"autoFormat": function(){
+			alert("not yet implemented");
+		}		
+	},
 	constructor: function () {
-		this._editors = [{
+		this._editors = [dojo.delegate(this._editorMixin, {
 			"id": "javascript",
+			"initialized": false,
 			"containerNode": "centerLeftPane",
-			"widget": null,
 			"syntax": "js",
 			"defaultValue": "/* js code here */",
-			"getValue": function () {
-				return this.editorHandle.getCode();
-			},
-			"setValue": function (value) {
-				this.editorHandle.setCode(value);
-			},
 			"autoFormat": function(){
 				this.setValue( js_beautify( this.getValue() ) );
 			}
-		},
-		{
+		}),
+		dojo.delegate(this._editorMixin, {
 			"id": "html",
 			"containerNode": "centerTopRightPane",
-			"widget": null,
 			"syntax": "html",
 			"defaultValue": "<!-- html code here -->",
-			"getValue": function () {
-				return this.editorHandle.getCode();
-			},
-			"setValue": function (value) {
-				this.editorHandle.setCode(value);
-			},
 			"autoFormat": function(){
 				this.setValue( dojox.html.format.prettyPrint(dojox.html.entities.decode( this.getValue() )) );
 			}
-		},
-		{
+		}),
+		dojo.delegate(this._editorMixin, {
 			"id": "css",
 			"containerNode": "centerBottomRightPane",
-			"widget": null,
 			"syntax": "css",
-			"defaultValue": "/* css code here */",
-			"getValue": function () {
-				return this.editorHandle.getCode();
-			},
-			"setValue": function (value) {
-				this.editorHandle.setCode(value);
-			},
-			"autoFormat": function(){
-				alert("not implemented yet");
-			}
-		}];
+			"defaultValue": "/* css code here */"
+		})];
 	},
 
 	postCreate: function () {
 		this.inherited(arguments);
 
-		this.fetchConfig();
 		this.setupEditors();
+		this.fetchConfig();
 	},
 
 	startup: function () {
@@ -263,21 +259,18 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 								this._updateBucketInfoNodes();
 
 								var setValueFn = function(response, responseField, editor) {
-									editor.widget.setValue(response[responseField]);
+									editor.setValue(response[responseField]);
 								};
 								var setValuePartial = dojo.partial(setValueFn, response);
-								dojo.forEach(this._editors, dojo.hitch(setValuePartial, function (editor) {
+								dojo.forEach(this._editors, function(editor) {
 									if (editor.id == 'html') {
-						//								editor.widget.setValue(response.content_html);
 										this('content_html', editor);
 									} else if (editor.id == 'css') {
-						//								editor.widget.setValue(response.content_css);
 										this('content_css', editor);
 									} else if (editor.id == 'javascript') {
-						//								editor.widget.setValue(response.content_js);
 										this('content_js', editor);
 									}
-								}));
+								}, setValuePartial);
 								this.djConfig.set('value', response.dj_config);
 								this.versionSelect.set('value', response.dojo_version);
 								this._djConfigChanged();
@@ -342,11 +335,14 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 		};
 
 		dojo.forEach(this._editors, function (editor) {
-			editor.widget = new dijit.form.SimpleTextarea({
-				"style": "height: 100%; width: 100%;"
-			});
-			editor.widget.placeAt(this[editor.containerNode].containerNode);
 
+			editor.baseNode = dojo.create("textarea", {
+					"style": {
+						"height": "100%",
+						"width": "100%"
+					}
+				}, this[editor.containerNode].containerNode);
+			
 			var parserfile = "";
 			var stylesheet = "";
 			switch (editor.syntax) {
@@ -366,17 +362,21 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 				break;
 			}
 
-			editor.editorHandle = CodeMirror.fromTextArea(editor.widget.textbox.id, {
+			editor.widget = CodeMirror.fromTextArea(editor.baseNode, {
 				"height": "90%",
 				"width": "100%",
 				"content": editor.defaultValue,
 				"parserfile": parserfile,
 				"stylesheet": stylesheet,
 				"path": this._basePath + "js/",
-				"autoMatchParens": true
+				"autoMatchParens": true,
+				"onLoad": dojo.hitch(editor, function(){
+					this.initialized = true;
+					this.onInit();
+				})
 			});
 
-			var toolbar = new dijit.Toolbar().placeAt(editor.editorHandle.wrapping, "before");
+			var toolbar = new dijit.Toolbar().placeAt(editor.widget.wrapping, "before");
 			var menu = new dijit.Menu({
 				style: "display: none;"
 			});
@@ -387,6 +387,37 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 					scope.autoFormat();
 				}, editor)
 			}));
+			
+			dojo.forEach(editor.additionalMenuItems, function(menuItem){
+				menu.addChild(menuItem);
+			}, this);
+			
+			//@TODO: find a better way to add individual menuitems
+			if( editor.syntax == "html"){
+				menu.addChild(new dijit.MenuItem({
+					label: "WYSIWYG Editor",
+					onClick: dojo.hitch(this, dojo.partial(function (scope, evt) {					
+						if(!this._designerDlg){
+							this._designerDlg = new dijit.Dialog({
+								"style": "height: 600px; width: 1200px;"
+							});	
+						
+							this._designerWidget = new wuhi.designer.Designer({"style": "height: 100%; width: 100%;"});
+							this._designerDlg.show();
+							this._designerWidget.placeAt(this._designerDlg.containerNode);
+							this._designerWidget.startup();
+							
+							dojo.connect(this._designerDlg, "onHide", this, function(){
+								this._getEditorItem("html").setValue(this._designerWidget.get("outputSource"));
+							});
+						}
+						
+						this._designerWidget.set("source", this._getEditorItem("html").getValue());
+						this._designerDlg.show();					
+
+					}, editor))
+				}));
+			}
 
 			toolbar.addChild(new dijit.form.DropDownButton({
 				"label": editor.id,
