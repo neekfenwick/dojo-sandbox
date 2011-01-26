@@ -1,0 +1,50 @@
+
+.wuhiDesignerIcon {
+	background-repeat:no-repeat;
+	height:16px;
+	text-align:center;
+	width:16px;
+}
+
+.wuhiDesignerIconPlay {
+	background-image:url(img/play.png);
+}
+
+.wuhiDesignerIconUndo {
+	background-image:url(img/Undo.png);
+}
+
+.wuhiDesignerIconRedo {
+	background-image:url(img/Redo.png);
+}
+
+.wuhiDesignerIconTheme {
+	background-image:url(img/Theme.png);
+}
+
+.wuhiDesignerIconAlignToGrid {
+	background-image:url(img/AlignToGrid.png);
+}
+
+.wuhiDesignerWidgetMoveable, .wuhiDesignerWidgetMoveable input {
+	cursor: move;
+}
+
+.wuhiDesignerDesignPane {
+	background-color: white;
+}
+
+.wuhiDesigner .dojoDndItem {
+	background-color: #efefef;
+	padding: 5px;
+	font-weight: bold;
+	margin-top: 1px;
+	font-size: 10px;
+}
+
+.wuhiDesigner .dijitToasterContent {
+	background-color: lightblue;
+	border: 1px solid black;
+	font-size: 12px;
+	color: black;
+}
