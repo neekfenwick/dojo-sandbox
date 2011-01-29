@@ -58,3 +58,18 @@ html, body, .frontend {
 	display: inline-block;
 	width: 8em;
 }
+.sandboxIcon {
+	background-repeat:no-repeat;
+	height:16px;
+	text-align:center;
+	width:16px;
+}
+.sandboxIconPlay {
+	background-image:url(img/play.png);
+}
+.sandboxIconDev {
+	background-image:url(img/dev.png);
+}
+.sandboxIconDesigner{
+	background-image:url(img/designer.png);
+}

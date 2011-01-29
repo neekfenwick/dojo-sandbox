@@ -50,6 +50,9 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 			return this.widget.getCode();
 		},
 		"setValue": function (value) {	
+			if(!value){
+				return;
+			}
 			if(this.initialized == false){
 				this._valueToInit = value;
 			}else{
@@ -96,6 +99,9 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 
 		this.setupEditors();
 		this.fetchConfig();
+		this.djConfig.onKeyUp();
+		
+		this.connect(this.centerTabContainer, "selectChild", "_selectTab");
 	},
 
 	startup: function () {
@@ -125,14 +131,18 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 					if (this.configStore.getValue(item, "name") == "dojo_versions") {
 						console.log("Fill in versions: " + this.configStore.getValue(item, "value"));
 						allLayers = this.configStore.getValue(item, "value");
-						dojo.forEach(allLayers.split('##'), dojo.hitch(this, function (v) {
+						dojo.forEach(allLayers.split('##'), dojo.hitch(this, function (v, index, arr) {
 							console.log("Adding version: ", v);
 							this.versionSelect.addOption([{
 								value: v,
 								label: v,
-								selected: true,
+								//selected: (index == (arr.length -1))?true:false,
 								disabled: false
 							}]);
+							
+							if(index == (arr.length -1)){
+								this.versionSelect.set("value", v); // select the last option
+							}
 						}));
 					} else if (this.configStore.getValue(item, "name") == "dojo_layers") {
 						console.log("Fill in layers: " + this.configStore.getValue(item, "value"));
@@ -391,33 +401,6 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 			dojo.forEach(editor.additionalMenuItems, function(menuItem){
 				menu.addChild(menuItem);
 			}, this);
-			
-			//@TODO: find a better way to add individual menuitems
-			if( editor.syntax == "html"){
-				menu.addChild(new dijit.MenuItem({
-					label: "WYSIWYG Editor",
-					onClick: dojo.hitch(this, dojo.partial(function (scope, evt) {					
-						if(!this._designerDlg){
-							this._designerDlg = new dijit.Dialog({
-								"style": "height: 600px; width: 1200px;"
-							});	
-						
-							this._designerWidget = new wuhi.designer.Designer({"style": "height: 100%; width: 100%;"});
-							this._designerDlg.show();
-							this._designerWidget.placeAt(this._designerDlg.containerNode);
-							this._designerWidget.startup();
-							
-							dojo.connect(this._designerDlg, "onHide", this, function(){
-								this._getEditorItem("html").setValue(this._designerWidget.get("outputSource"));
-							});
-						}
-						
-						this._designerWidget.set("source", this._getEditorItem("html").getValue());
-						this._designerDlg.show();					
-
-					}, editor))
-				}));
-			}
 
 			toolbar.addChild(new dijit.form.DropDownButton({
 				"label": editor.id,
@@ -426,7 +409,11 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 
 		}, this);
 	},
-
+	_selectTab: function(tab){
+		if(tab == this.designerWidget){
+			//this._getEditorItem("html").setValue(this.designerWidget.get("outputSource"));
+		}
+	},
 	_getEditorItem: function (id) {
 		return dojo.filter(this._editors, function (editor) {
 			return (editor.id == id) ? editor : undefined;
@@ -524,7 +511,7 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 			"content": request,
 			"handleAs": "json",
 			"load": dojo.hitch(this, function (response) {
-				console.log("LOAD: ", response);
+				//console.log("LOAD: ", response);
 				//				// cannot have the 302 response cause a Redirect, so do this instead.
 				//				window.location = "/" + response.namespace + "/" + response.id +
 				//					"/" + response.version;
@@ -591,7 +578,7 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 	},
 
 	generateUrl: function () {
-		console.log("generateUrl using this._bucketInfo: ", this._bucketInfo);
+		//console.log("generateUrl using this._bucketInfo: ", this._bucketInfo);
 		return "/backend/run/index" + "/namespace/" + this._bucketInfo.namespace + "/id/" + this._bucketInfo.id + "/version/" + this._bucketInfo.version;
 	}
 
