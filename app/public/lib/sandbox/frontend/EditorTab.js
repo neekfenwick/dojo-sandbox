@@ -14,6 +14,7 @@ dojo.declare("sandbox.frontend.EditorTab", [dijit.layout.ContentPane, dijit._Tem
 	widgetsInTemplate: true,
 	
 	_basePath: "/lib/codemirror/",
+	frontend: null,
 	_editors: [],
 	_editorMixin: {
 		"initialized": false,
