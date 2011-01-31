@@ -9,55 +9,7 @@
 				<div dojoAttachPoint="userInfoNode" class="userInfoNode"></div>
 			</div>
 		</div>
-		<div dojoType="dijit.layout.ContentPane" region="left" splitter="true" style="width: 170px;"
-			 class="bucketInfo">
-			<div dojoType="dijit.layout.ContentPane">
-			<h1>Your Bucket</h1>
-			<table class="bucketInfoTable">
-				<tbody>
-					<tr>
-						<td class="infoLabel">Namespace:</span></td>
-						<td class="infoValue">
-							<span dojoAttachPoint="bucketNamespaceNode"></span>
-						</td>
-					</tr>
-					<tr>
-						<td class="infoLabel">Id:</td>
-						<td class="infoValue">
-							<span dojoAttachPoint="bucketIdNode"></span>
-						</td>
-					</tr>
-					<tr>
-						<td class="infoLabel">Version:</td>
-						<td class="infoValue">
-							<span dojoAttachPoint="bucketVersionNode"></span>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-
-			<label class="leftLabel" for="versionSelect">Dojo Version:</label>
-			<br/>
-			<div dojoType="dijit.form.Select" dojoAttachPoint="versionSelect"
-				 id="versionSelect" style="width: 90%"></div>
-			<br/>
-			<fieldset dojoAttachPoint="layersContainer"><legend>Layers</legend>
-			</fieldset>
-
-			<label class="leftLabel" for="djConfig">djConfig:</label>
-			<br/>
-			<div dojoType="dijit.form.Textarea" dojoAttachPoint="djConfig" value="parseOnLoad: true"
-				 id="djConfig" class="djConfigArea" style="width: 100%"
-				 dojoAttachEvent="onKeyUp: _djConfigChanged"></div>
-			<br/>
-			<div dojoType="dijit.layout.ContentPane">
-				<span class="leftLabel">Parsed djConfig:</span>
-				<div class="djConfigParsed" dojoAttachPoint="djConfigParsed"></div>
-			</div>
-			<div dojoType="dijit.form.Button" label="Launch for Debug"
-				 dojoAttachEvent="onClick: _launchClick"
-				 title="Open a new window containing this bucket, for easy script debugging."></div>
-			</div>
+		<div dojoType="sandbox.frontend.SetupPane" region="left" splitter="true" style="width: 170px;" dojoAttachPoint="setupPane" class="bucketInfo">			
 		</div>
 		<div dojoType="dijit.layout.TabContainer" region="center" dojoAttachPoint="centerTabContainer" doLayout="true">
 			<div dojoType="sandbox.frontend.EditorTab" title="Develop" dojoAttachPoint="editorTab" iconClass="sandboxIcon sandboxIconDev">
