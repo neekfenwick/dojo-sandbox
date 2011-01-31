@@ -12,7 +12,7 @@ dojo.require("dijit.layout.TabContainer");
 dojo.require("dijit.form.DropDownButton");
 dojo.require("dojox.html.format");
 
-dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
+dojo.declare("sandbox.Frontend", [dijit.layout.ContentPane, dijit._Templated], {
 
 	widgetsInTemplate: true,
 	templateString: dojo.cache("sandbox", "templates/Frontend.html"),
@@ -106,9 +106,6 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 
 	startup: function () {
 		this.inherited(arguments);
-
-		//@TODO: fix this hack! the tabcontainer needs to get resized on startup. why?!
-		setTimeout(dojo.hitch(this.mainBorderContainer, "layout"), 100);
 	},
 
 	fetchConfig: function () {
