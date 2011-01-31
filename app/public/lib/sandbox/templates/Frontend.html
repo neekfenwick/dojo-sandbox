@@ -60,14 +60,7 @@
 			</div>
 		</div>
 		<div dojoType="dijit.layout.TabContainer" region="center" dojoAttachPoint="centerTabContainer" doLayout="true">
-			<div dojoType="dijit.layout.ContentPane" title="Develop" iconClass="sandboxIcon sandboxIconDev">
-				<div dojoType="dijit.layout.BorderContainer" design="sidebar" style="border: none;">
-					<div dojoType="dijit.layout.ContentPane" region="leading" dojoAttachPoint="centerLeftPane" splitter="true" style="width: 50%;"></div>
-					<div dojoType="dijit.layout.ContentPane" region="top" dojoAttachPoint="centerTopRightPane" splitter="true" style="height: 50%;">
-					
-					</div>
-					<div dojoType="dijit.layout.ContentPane" region="center" dojoAttachPoint="centerBottomRightPane" splitter="true"></div>
-				</div>
+			<div dojoType="sandbox.frontend.EditorTab" title="Develop" dojoAttachPoint="editorTab" iconClass="sandboxIcon sandboxIconDev">
 			</div>
 			<div dojoType="wuhi.designer.Designer" dojoAttachPoint="designerWidget" iconClass="sandboxIcon sandboxIconDesigner" title="WYSIWYG">
 			</div>
