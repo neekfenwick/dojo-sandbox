@@ -525,16 +525,7 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 			"handleAs": "json",
 			"load": dojo.hitch(this, function (response) {
 				console.log("LOAD: ", response);
-				//				// cannot have the 302 response cause a Redirect, so do this instead.
-				//				window.location = "/" + response.namespace + "/" + response.id +
-				//					"/" + response.version;
-				this._bucketInfo = {
-					namespace: response.namespace,
-					id: response.id,
-					version: response.version
-				};
-				this._updateBucketInfoNodes();
-				this.refreshRunNode();
+				this.iframeRunNode.src = "/backend/run/index/session_id/" + response.session_id;
 			}),
 			"error": function(response) {
 				if (response) {
