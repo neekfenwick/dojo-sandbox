@@ -22,6 +22,7 @@ if (isset($_REQUEST['debug']) && $_REQUEST['debug'] == '1') {
 error_log("debug $debug dojo_path $dojo_path sandbox_path $sandbox_path");
 $no_dojodeps_layer = (isset($_REQUEST['nodojodepslayer']) && $_REQUEST['nodojodepslayer'] == '1');
 $no_sandbox_layer = (isset($_REQUEST['nosandboxlayer']) && $_REQUEST['nosandboxlayer'] == '1');
+$no_designer_layer = (isset($_REQUEST['nodesignerlayer']) && $_REQUEST['nodesignerlayer'] == '1');
 ?>
 <html>
 <head><title>Dojo sandbox</title>
@@ -29,14 +30,16 @@ $no_sandbox_layer = (isset($_REQUEST['nosandboxlayer']) && $_REQUEST['nosandboxl
   <script src="<?php echo $lib_path; ?>/vital/jsbeautify.js" type="text/javascript"></script>
   <script type="text/javascript" src="<?php echo $dojo_path; ?>/dojo/dojo.js"
           djConfig="parseOnLoad: true<?php echo $djConfig; ?>"></script>
-  <script type="text/javascript" src="<?php echo $lib_path; ?>/wuhi/ExtendedDnd.js"></script>
 <?php if (!$no_dojodeps_layer) { ?>
   <script type="text/javascript" src="<?php echo $dojo_path; ?>/dojo/dojodeps.js"></script>
 <?php } ?>
 <?php if (!$no_sandbox_layer) { ?>
   <script type="text/javascript" src="<?php echo $dojo_path; ?>/dojo/sandbox.js"></script>
 <?php } ?>
-
+<?php if (!$no_designer_layer) { ?>
+  <script type="text/javascript" src="<?php echo $dojo_path; ?>/dojo/designer.js"></script>
+<?php } ?>
+  <script type="text/javascript" src="<?php echo $lib_path; ?>/wuhi/ExtendedDnd.js"></script>
   <link rel="stylesheet" href="<?php echo $dojo_path; ?>/dojo/resources/dojo.css">
   <link rel="stylesheet" href="<?php echo $dojo_path; ?>/dijit/themes/claro/claro.css">
   <link rel="stylesheet" href="<?php echo $lib_path; ?>/sandbox/sandbox.css">
@@ -44,8 +47,6 @@ $no_sandbox_layer = (isset($_REQUEST['nosandboxlayer']) && $_REQUEST['nosandboxl
   <style>
 	@import "<?php echo $lib_path; ?>/wuhi/Designer.css";
 	@import "<?php echo $dojo_path; ?>/dojox/grid/resources/claroGrid.css";
-	@import "<?php echo $dojo_path; ?>/dojox/widget/Toaster/Toaster.css";
-	@import "<?php echo $dojo_path; ?>/dojox/widget/Dialog/Dialog.css";
 </style>
   <script type="text/javascript">
 <?php if ($debug) { ?>

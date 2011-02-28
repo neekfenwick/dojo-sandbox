@@ -4,14 +4,32 @@ dependencies ={
             name: "dojodeps.js",
             resourceName: 'dojodeps.dojo',
             dependencies: [
+		"dojo._base.lang",
+		"dojo.dnd.Container",
+		"dojo.dnd.Selector",
+		"dojo.dnd.Source",
                 "dojox.analytics.Urchin",
                 "dijit.layout.BorderContainer",
                 "dijit.layout.ContentPane",
                 "dijit.Toolbar",
                 "dijit.form.Button",
                 "dijit.form.ValidationTextBox",
-		"dojox.data.JsonRestStore",
-		
+		"dojox.data.JsonRestStore"
+            ],
+            copyrightFile: 'sandboxCopyright.txt'
+        },
+        {
+            name: "sandbox.js",
+            resourceName: 'sandbox.dojo',
+            dependencies: [
+				"sandbox.Frontend"
+            ],
+            copyrightFile: 'sandboxCopyright.txt'
+        },
+	{
+            name: "designer.js",
+            resourceName: 'designer.dojo',
+            dependencies: [
 		"wuhi.designer.Designer",
 		"wuhi.designer.dijit.form.TextBox",
 		"wuhi.designer.dijit.form.Button",
@@ -35,14 +53,6 @@ dependencies ={
 		"wuhi.designer.dijit.Menu",
 		"wuhi.designer.dijit.MenuItem",
 		"wuhi.designer.dijit.PopupMenuItem"
-            ],
-            copyrightFile: 'sandboxCopyright.txt'
-        },
-        {
-            name: "sandbox.js",
-            resourceName: 'sandbox.dojo',
-            dependencies: [
-				"sandbox.Frontend"
             ],
             copyrightFile: 'sandboxCopyright.txt'
         }

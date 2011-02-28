@@ -2,6 +2,7 @@ dojo.provide("wuhi.designer.Designer");
 
 dojo.require("dijit._Widget");
 dojo.require("dijit._Templated");
+dojo.require("dijit.layout.ContentPane");
 dojo.require("wuhi.designer._WidgetDescriptor");
 dojo.require("dijit.layout.BorderContainer");
 dojo.require("dijit.layout.ContentPane");
@@ -27,7 +28,7 @@ dojo.require("dijit.form.ToggleButton");
 dojo.require("wuhi.designer.SelectionController");
 dojo.require("dojox.html.entities");
 
-dojo.declare("wuhi.designer.Designer", [dijit._Widget, dijit._Templated],{
+dojo.declare("wuhi.designer.Designer", [dijit.layout.ContentPane, dijit._Templated],{
 
 	templateString: dojo.cache("wuhi.designer","resources/Designer.html"),
 	widgetsInTemplate: true,
