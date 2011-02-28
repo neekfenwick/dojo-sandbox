@@ -8,46 +8,29 @@ if [[ ! -e $COPYRIGHT ]] ; then
 fi
 
 
-# --------------- dojo 1.4.3 ---------------
-BUILDSCRIPTS=../lib/dojo-release-1.4.3-src/util/buildscripts
-if [[ ! -e $BUILDSCRIPTS ]] ; then
-	echo Cannot find buildscripts dir $BUILDSCRIPTS
-	exit 1
-fi
+function buildAVersion() {
+	VERSION=$1
+	BUILDSCRIPTS=../lib/dojo-release-$VERSION-src/util/buildscripts
+	if [[ ! -e $BUILDSCRIPTS ]] ; then
+		echo Cannot find buildscripts dir $BUILDSCRIPTS
+		exit 1
+	fi
 
-cp $COPYRIGHT $BUILDSCRIPTS
+	cp $COPYRIGHT $BUILDSCRIPTS
 
-pushd $BUILDSCRIPTS
+	pushd $BUILDSCRIPTS
 
-echo Calling build.sh in `pwd`
+	echo Calling build.sh in `pwd`
 
-./build.sh profile=standard releaseName=dojo-1.4.3 version=1.4.3-standard releaseDir=../../.. optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
+	./build.sh profile=standard releaseName=dojo-${VERSION} version=${VERSION}-standard releaseDir=../../.. optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
 
-./build.sh profile=standard releaseName=dojo-1.4.3-nooptimize version=1.4.3-standard-nooptimize releaseDir=../../.. optimize=none cssOptimize=none layerOptimize=none stripConsole=none action=clean,release
+	./build.sh profile=standard releaseName=dojo-${VERSION}-nooptimize version=${VERSION}-standard-nooptimize releaseDir=../../.. optimize=none cssOptimize=none layerOptimize=none stripConsole=none action=clean,release
 
-popd
-# --------------- dojo 1.4.3 ---------------
+	popd
+}
 
-# --------------- dojo 1.5.0 ---------------
-BUILDSCRIPTS=../lib/dojo-release-1.5.0-src/util/buildscripts
-if [[ ! -e $BUILDSCRIPTS ]] ; then
-	echo Cannot find buildscripts dir $BUILDSCRIPTS
-	exit 1
-fi
-
-cp $COPYRIGHT $BUILDSCRIPTS
-
-pushd $BUILDSCRIPTS
-
-echo Calling build.sh in `pwd`
-
-./build.sh profile=standard releaseName=dojo-1.5.0 version=1.5.0-standard releaseDir=../../.. optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
-
-./build.sh profile=standard releaseName=dojo-1.5.0-nooptimize version=1.5.0-standard-nooptimize releaseDir=../../.. optimize=none cssOptimize=none layerOptimize=none stripConsole=none action=clean,release
-
-popd
-# --------------- dojo 1.5.0 ---------------
-
-
+buildAVersion "1.4.3"
+buildAVersion "1.5.0"
+buildAVersion "1.6.0b2"
 
 echo Finished at `date`

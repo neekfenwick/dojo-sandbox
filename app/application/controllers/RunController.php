@@ -118,6 +118,12 @@ class RunController extends BaseController {
         case "1.5.0-nooptimize":
           $this->view->dojo_base_dir = '/lib/dojo-1.5.0-nooptimize'; // @TODO
           break;
+        case "1.6.0b2":
+          $this->view->dojo_base_dir = '/lib/dojo-1.6.0b2'; // @TODO
+          break;
+        case "1.6.0b2-nooptimize":
+          $this->view->dojo_base_dir = '/lib/dojo-1.6.0b2-nooptimize'; // @TODO
+          break;
         default:
           break;
       };
