@@ -38,7 +38,8 @@ dojo.declare("sandbox.frontend.SetupPane", [dijit.layout.ContentPane, dijit._Tem
 		}
 		dojo.attr(this.djConfigParsed, 'innerHTML', result);
 	},
-	_updateBucketInfoNodes: function(bucketInfo) {
+	_updateBucketInfo: function(bucketInfo) {
+		this.frontend._bucketInfo = dojo.mixin(this.frontend._bucketInfo, bucketInfo);
 		dojo.attr(this.bucketNamespaceNode, 'innerHTML', bucketInfo.namespace);
 		dojo.attr(this.bucketIdNode, 'innerHTML', bucketInfo.id);
 		dojo.attr(this.bucketVersionNode, 'innerHTML', bucketInfo.version);
@@ -200,7 +201,7 @@ dojo.declare("sandbox.frontend.SetupPane", [dijit.layout.ContentPane, dijit._Tem
 								window.alert("Error from server! " + response.message);
 							} else {
 		
-								this._updateBucketInfoNodes({
+								this._updateBucketInfo({
 									namespace: response.namespace,
 									id: response.id,
 									version: response.version
