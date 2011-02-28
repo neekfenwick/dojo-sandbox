@@ -83,3 +83,14 @@ CREATE TABLE bucket_resource (
 
 INSERT INTO user (username, role, first_name, last_name, email) VALUES
 ('public', 'user', 'Public', 'User', '');
+
+INSERT INTO bucket (namespace, id, name, description, latest_version)
+VALUES
+('public', '1234', 'Test bucket', 'This is a test', 0);
+
+INSERT INTO bucket_version (bucket_namespace, bucket_id, version, dojo_version, content_html, content_js, content_css, dj_config, layers)
+VALUES
+('public', '1234', '0', '1.5.0-nooptimize',
+'<div dojoType="dijit.form.TextBox" id="tb"></div>',
+'dojo.require("dijit.form.TextBox"); dojo.ready(function() {   dijit.byId("tb").set("value", "dynamically set"); });',
+'', 'parseOnLoad: true', 'dijit-all');
