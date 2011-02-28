@@ -10,22 +10,19 @@ class RunController extends BaseController {
    * version - optional version number of the bucket
    */
 	public function indexAction(){
-/*		$sessionId = $this->getRequest()->getParam("id");
-		$session = new Zend_Session_Namespace("runIframe");
-
-		if($sessionId == $session->id){
-			$this->view->html = $session->html;
-			$this->view->css = $session->css;
-			$this->view->javascript = $session->javascript;
-		}*/
     $db = $this->_helper->database->getAdapter();
-    // @TODO: how do you log in zend?
-//      self::$logger = new Zend_Log();
-//      $writer = new Zend_Log_Writer_Stream('php://stderr');
-//      self::$logger->addWriter($writer);
+
+    // get params from request
     $namespace = $this->getRequest()->getParam("namespace");
     $id = $this->getRequest()->getParam("id");
     self::$logger->info("index fetching bucket namespace ($namespace) id ($id)");
+
+    $dojoLibOverrideUrl = $this->getRequest()->getParam("dojoLibOverrideUrl");
+    $dojoLibOverrideSDK = $this->getRequest()->getParam("dojoLibOverrideSDK");
+    $dojoLibOverrideLoader = $this->getRequest()->getParam("dojoLibOverrideLoader");
+    $dojoThemeOverride = $this->getRequest()->getParam("dojoThemeOverride");
+    $onLoadHandler = $this->getRequest()->getParam("onLoadHandler");
+    self::$logger->info("given ($dojoLibOverrideUrl) ($dojoLibOverrideSDK) ($dojoLibOverrideLoader) ($onLoadHandler)");
 
     // fetch overall bucket info
     $select = $db	->select()
@@ -64,23 +61,48 @@ class RunController extends BaseController {
     $this->view->html = $version_data->content_html;
     $this->view->dj_config = $version_data->dj_config;
     $this->view->layers = $version_data->layers; // NB still ## separated
-    switch ($version_data->dojo_version) {
-      case "1.4.3":
-        $this->view->dojo_base_dir = 'dojo-1.4.3'; // @TODO
-        break;
-      case "1.4.3-nooptimize":
-        $this->view->dojo_base_dir = 'dojo-1.4.3-nooptimize'; // @TODO
-        break;
-      case "1.5.0":
-        $this->view->dojo_base_dir = 'dojo-1.5.0'; // @TODO
-        break;
-      case "1.5.0-nooptimize":
-        $this->view->dojo_base_dir = 'dojo-1.5.0-nooptimize'; // @TODO
-        break;
-      default:
-        break;
-    };
-    $this->view->dojo_theme = 'claro';
+    if (isset($dojoLibOverrideUrl)) {
+      $this->view->dojo_base_url = $dojoLibOverrideUrl;
+    } else {
+      $this->view->dojo_base_url = "";
+    }
+    if (isset($dojoLibOverrideSDK)) {
+      // Use the dojo lib we were given in the request
+      $this->view->dojo_base_dir = $dojoLibOverrideSDK;
+    } else {
+      // Use the dojo lib stored against this bucket
+      switch ($version_data->dojo_version) {
+        case "1.4.3":
+          $this->view->dojo_base_dir = '/lib/dojo-1.4.3'; // @TODO
+          break;
+        case "1.4.3-nooptimize":
+          $this->view->dojo_base_dir = '/lib/dojo-1.4.3-nooptimize'; // @TODO
+          break;
+        case "1.5.0":
+          $this->view->dojo_base_dir = '/lib/dojo-1.5.0'; // @TODO
+          break;
+        case "1.5.0-nooptimize":
+          $this->view->dojo_base_dir = '/lib/dojo-1.5.0-nooptimize'; // @TODO
+          break;
+        default:
+          break;
+      };
+    }
+    if (isset($dojoLibOverrideLoader)) {
+      $this->view->dojo_loader = $dojoLibOverrideLoader;
+    } else {
+      $this->view->dojo_loader = "/dojo/dojo.js";
+    }
+    if (isset($dojoThemeOverride)) {
+      $this->view->dojo_theme = $dojoThemeOverride;
+    } else {
+      $this->view->dojo_theme = 'claro'; // TODO no theme support yet
+    }
+    self::$logger->info("onLoadHandler ($onLoadHandler)");
+    if (isset($onLoadHandler)) {
+      self::$logger->info("setting to on_load_handler.");
+      $this->view->on_load_handler = $onLoadHandler;
+    }
 
 	}
 
@@ -97,15 +119,14 @@ class RunController extends BaseController {
       $namespace = 'public';
     }
     if (!isset($id) || $id == '') {
-      self::$logger->info("id not provided, default to '1234'");
-//      $id = '1234'; // @TODO make me random
+      self::$logger->info("id not provided, generating new random id");
       $accepted = false;
       while (!$accepted) {
         $id = substr(md5(uniqid(mt_rand(), true)), 0, 5);
         $rs = $db->fetchRow($db->select()->from('bucket', 'COUNT(*) as count')
             ->where('namespace', $namespace)
             ->where('id', $id));
-        self::$logger->info("random id ($id) count " . $rs->count);
+        self::$logger->info(" .. try random id ($id) count " . $rs->count);
         $accepted = ($rs->count == 0);
       }
       self::$logger->info("Accepted new id ($id)");
@@ -177,13 +198,13 @@ class RunController extends BaseController {
             $bucket_contents));
       } else {
 
-        self::$logger->info("not saveAsNew, update existing version ($version)");
-        $where = array();
-        $where[] = $db->quoteInto('bucket_id = ?', $id); // sql-injection save quotation
-        $where[] = $db->quoteInto('bucket_namespace = ?', $namespace); // sql-injection save quotation
-        $where[] = $db->quoteInto('version = ?', $version); // sql-injection save quotation
-
-        $db->update('bucket_version', $bucket_contents, $where);
+        self::$logger->info("not saveAsNew, .. don't update existing version ($version)");
+//        $where = array();
+//        $where[] = $db->quoteInto('bucket_id = ?', $id); // sql-injection save quotation
+//        $where[] = $db->quoteInto('bucket_namespace = ?', $namespace); // sql-injection save quotation
+//        $where[] = $db->quoteInto('version = ?', $version); // sql-injection save quotation
+//
+//        $db->update('bucket_version', $bucket_contents, $where);
       }
     }
 
