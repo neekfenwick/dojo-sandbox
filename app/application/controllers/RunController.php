@@ -65,12 +65,12 @@ class RunController extends BaseController {
       }
       
       $bucket_contents = array(
-        $version_data->dojo_version,
-        $version_data->content_html,
-        $version_data->content_css,
-        $version_data->content_js,
-        $version_data->dj_config,
-        $version_data->layers);
+        'dojo_version' => $version_data->dojo_version,
+        'content_html' => $version_data->content_html,
+        'content_css' => $version_data->content_css,
+        'content_js' => $version_data->content_js,
+        'dj_config' => $version_data->dj_config,
+        'layers' => $version_data->layers);
     }
 
     /* Populate template parameters for the view */
