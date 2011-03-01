@@ -169,10 +169,10 @@ class RunController extends BaseController {
       'dj_config' => $dj_config,
       'layers' => $layers);
 
-    // we will write back various fields depending on saveAsNew
+    // we will write back various fields depending on save_as_new
     $response = array();
 
-    if (isset($_REQUEST['saveAsNew'])) {
+    if (isset($_REQUEST['save_as_new'])) {
 
       // We may not have been passed any identifying info
       $namespace = $this->getRequest()->getParam("namespace");
@@ -230,7 +230,7 @@ class RunController extends BaseController {
       } else {
 
         $version ++;
-        self::$logger->info("saveAsNew version becomes ($version)");
+        self::$logger->info("save_as_new version becomes ($version)");
         $db->insert('bucket_version', array_merge(
             array(
               'bucket_namespace' => $namespace,

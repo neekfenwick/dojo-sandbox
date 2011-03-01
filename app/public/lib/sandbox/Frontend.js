@@ -77,10 +77,9 @@ dojo.declare("sandbox.Frontend", [dijit.layout.ContentPane, dijit._Templated], {
 	_saveasnewClick: function () {
 
 		this.saveBucket({
-			saveAsNew: true
+			save_as_new: true
 		}, function (response) {
 			console.log("saveAsNew load: ", response);
-			//				// cannot have the 302 response cause a Redirect, so do this instead.
 			window.location = "/" + response.namespace + "/" + response.id + "/" + response.version;
 		});
 	},

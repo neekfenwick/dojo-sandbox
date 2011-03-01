@@ -10,7 +10,10 @@ $ git clone git@github.com:neekfenwick/dojo-sandbox.git
 $ git commit -a
 $ git push
 
-To build the custom build to lib/dojo:
+dojo-sandbox runs off a custom build of dojo called dojo-1.5.0-sandbox, as well as
+having various versions of dojo available for running each sandbox.
+
+To build the dojo-1.5.0-sandbox custom build to lib/dojo:
 
 $ cd app/public/config
 $ ./build-sandbox-dojo.js
@@ -21,6 +24,26 @@ $ cd app/public/lib/dojo-release-1.5.0-src/util/buildscripts
 $ cp ../../../../config/sandboxCopyright.txt .
 $ ./build.sh profile=../../../../../config/sandbox releaseName=dojo version=1.5.0-sandbox releaseDir=../../.. optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
 
+To build all the versions of dojo available when running sandboxes, first have
+the various dojo SDKs available, e.g.
+
+app/lib/dojo-release-1.4.3-src
+app/lib/dojo-release-1.5.0-src
+app/lib/dojo-release-1.6.0b2-src
+
+Then run the build script to run the build process in each one:
+
+$ cd app/public/config
+$ ./build-all-dojo.sh
+
+All libraries (dojo-sandbox and the various dojo-* builds) are built into app/lib,
+not their respective <dojo-sdk-dir>/release directories.  You should get a set
+of custom builds:
+
+app/lib/dojo-1.4.3
+app/lib/dojo-1.4.3-nooptimize
+app/lib/dojo-1.5.0
+.. etc
 
 CALLING THE APP
 ---------------
@@ -33,8 +56,22 @@ http://myserver.com/index.php
 To run in 'debug' mode, using dojo in lib/dojo-release-1.5.0-src
 http://myserver.com/index.php?debug=1
 
+Turning on 'debug':
+- uses the SDK version of dojo for the sandbox frontend
+- uses the source 'app/lib/sandbox' directory for the sandbox.* modules
+- turns on "debug: true" in djConfig
+
 To not load the sandbox.js layer (so that dojo loads fast but sandbox dijits are loaded separately):
-http://myserver.com/index.php?nolayer=1
+http://myserver.com/index.php?nosandboxlayer=1
+
+This will omit the <script> tag for the sandbox.js file, which means all
+dojo.require() statements for our sandbox.* modules result in explicit network
+calls for the files, making them easier to debug.
+
+There are also "nodojodepslayer" which excludes the <script> tag for the
+dojodeps.js file which contains core dojo/dijit/dojox dependencies of the sandbox
+frontend, and "nodesignerlayer" which excludes the <script> tag for the layer
+containing the designer modules.
 
 SETTING UP THE VIRTUAL HOST
 -----------------
@@ -53,5 +90,49 @@ Its important to set AllowOverride All because in /public/backend/ is a .htacces
 	</Directory>
 </VirtualHost>
 
+CALLING DOJO-SANDBOX FROM EXTERNAL SYSTEMS
+------------------------------------------
 
+You may want to throw html/js/css at dojo-sandbox and be given a working frontend
+where the code is runnable/editable.  To do this, use a similar system to that
+employed by the "Save As New" feature in dojo-sandbox itself:
 
+POST {
+  save_as_new: 1
+  name: 'something'
+  description: 'something'
+  dojo_version: '1.5.0'
+  dj_config: 'parseOnLoad: true'
+  html: '<p>woo</p>
+  js: 'console.log("woo");'
+  css: 'BODY { background: red; }'
+  layers: 'dijit-all'
+}
+
+You should get a resonse to your post such as:
+
+{"namespace":"public","id":"639df","version":0,"session_id":705557}
+
+There is now a database entry on dojo-sandbox for this 'bucket', /public/639df/0,
+which can be accessed via the frontend at http://dojo-sandbox.net/public/639df/0.
+Alternatively, the contents has also been stored in a session variable and can
+be run directly with http://dojo-sandbox.net/backend/run/index/session_id/705557.
+
+EMBEDDING DOJO-SANDBOX VIA A DIALOG
+-----------------------------------
+
+Experimental sandbox.BucketButton and sandbox.BucketDialog dijits exist which
+can be used to launch a bucket in a standalone dialog, their content enclosed
+in an iframe and so distinct from the rest of the page's contents.  For example:
+
+http://dojo-sandbox-local.com/lib/sandbox/tests/test_BucketButton.html
+
+The BucketDialog may be instantiated with "showSource: false" to make it just
+show the iframe, or "showSource: true" (default) to make it display a TabContainer
+with html/js/css panes as well as the Run pane.
+
+At present it's very basic and doesn't try to syntax highlight or present its
+content well.
+
+--
+End of file.
