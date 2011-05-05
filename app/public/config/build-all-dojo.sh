@@ -31,6 +31,7 @@ function buildAVersion() {
 
 buildAVersion "1.4.3"
 buildAVersion "1.5.0"
-buildAVersion "1.6.0b2"
+buildAVersion "1.6.0"
+buildAVersion "1.6.1"
 
 echo Finished at `date`

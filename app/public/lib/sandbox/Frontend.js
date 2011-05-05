@@ -117,6 +117,13 @@ dojo.declare("sandbox.Frontend", [dijit.layout.ContentPane, dijit._Templated], {
 
 	_runClick: function () {
 
+		this.runBucket(this.refreshRunNode);
+	},
+	/* Helper function that calls the run controller to save the current bucket
+	 * in a session variable, and calls the supplied handler function with the
+	 * response.
+	 */
+	runBucket: function(handler) {
 		// Collect data from the active sandbox
 		var request = this.gatherBucketData();
 
@@ -126,8 +133,8 @@ dojo.declare("sandbox.Frontend", [dijit.layout.ContentPane, dijit._Templated], {
 			"content": request,
 			"handleAs": "json",
 			"load": dojo.hitch(this, function (response) {
-				console.log("LOAD: ", response);
-				this.iframeRunNode.src = "/backend/run/index/session_id/" + response.session_id;
+				console.log("runBucket LOAD: ", response);
+				handler.apply(this, [response]);
 			}),
 			"error": function(response) {
 				if (response) {
@@ -138,6 +145,11 @@ dojo.declare("sandbox.Frontend", [dijit.layout.ContentPane, dijit._Templated], {
 			}
 		});
 
+	},
+
+	/* Launch a new window with the bucket referred to in the provided response */
+	launchForDebug: function(response) {
+		window.open(this.generateUrl(response));//"/backend/run/index/session_id/" + response.session_id;
 	},
 
 	// Convenience method to gather a lump of data about the current bucket
@@ -167,15 +179,16 @@ dojo.declare("sandbox.Frontend", [dijit.layout.ContentPane, dijit._Templated], {
 	},
 
 	// Update the Run iframe with a URL according to the current bucket info
-	refreshRunNode: function () {
-		if (typeof(this._bucketInfo.id) != "undefined") {
-			this.iframeRunNode.src = this.generateUrl();
-		}
+	refreshRunNode: function (response) {
+//		if (typeof(this._bucketInfo.id) != "undefined") {
+			this.iframeRunNode.src = this.generateUrl(response);
+//		}
 	},
 
-	generateUrl: function () {
+	generateUrl: function (response) {
 		//console.log("generateUrl using this._bucketInfo: ", this._bucketInfo);
-		return "/backend/run/index" + "/namespace/" + this._bucketInfo.namespace + "/id/" + this._bucketInfo.id + "/version/" + this._bucketInfo.version;
+		//return "/backend/run/index" + "/namespace/" + this._bucketInfo.namespace + "/id/" + this._bucketInfo.id + "/version/" + this._bucketInfo.version;
+		return "/backend/run/index/session_id/" + response.session_id;
 	}
 
 });

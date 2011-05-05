@@ -105,28 +105,7 @@ class RunController extends BaseController {
       $this->view->dojo_base_dir = $dojoLibOverrideSDK;
     } else {
       // Use the dojo lib stored against this bucket
-      switch ($bucket_contents['dojo_version']) {
-        case "1.4.3":
-          $this->view->dojo_base_dir = '/lib/dojo-1.4.3'; // @TODO
-          break;
-        case "1.4.3-nooptimize":
-          $this->view->dojo_base_dir = '/lib/dojo-1.4.3-nooptimize'; // @TODO
-          break;
-        case "1.5.0":
-          $this->view->dojo_base_dir = '/lib/dojo-1.5.0'; // @TODO
-          break;
-        case "1.5.0-nooptimize":
-          $this->view->dojo_base_dir = '/lib/dojo-1.5.0-nooptimize'; // @TODO
-          break;
-        case "1.6.0b2":
-          $this->view->dojo_base_dir = '/lib/dojo-1.6.0b2'; // @TODO
-          break;
-        case "1.6.0b2-nooptimize":
-          $this->view->dojo_base_dir = '/lib/dojo-1.6.0b2-nooptimize'; // @TODO
-          break;
-        default:
-          break;
-      };
+      $this->view->dojo_base_dir = '/lib/dojo-' . $bucket_contents['dojo_version'];
     }
     if (isset($dojoLibOverrideLoader)) {
       $this->view->dojo_loader = $dojoLibOverrideLoader;

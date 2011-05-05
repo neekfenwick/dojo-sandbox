@@ -45,10 +45,7 @@ dojo.declare("sandbox.frontend.SetupPane", [dijit.layout.ContentPane, dijit._Tem
 		dojo.attr(this.bucketVersionNode, 'innerHTML', bucketInfo.version);
 	},
 	_launchClick: function () {
-		this.frontend.saveBucket({}, function (response) {
-			//console.log("launchClick callback, response: ", response);
-			window.open(this.generateUrl());
-		});
+		this.frontend.runBucket(this.frontend.launchForDebug);
 	},
 	fetchConfig: function () {
 		//dojo.xhrDelete( {
@@ -79,8 +76,9 @@ dojo.declare("sandbox.frontend.SetupPane", [dijit.layout.ContentPane, dijit._Tem
 								disabled: false
 							}]);
 							
-							if(index == (arr.length -1)){
-								this.versionSelect.set("value", v); // select the last option
+							//if(index == (arr.length -1)){// select the last option
+							if (index === 0) {
+								this.versionSelect.set("value", v); 
 							}
 						}));
 					} else if (this.configStore.getValue(item, "name") == "dojo_layers") {
