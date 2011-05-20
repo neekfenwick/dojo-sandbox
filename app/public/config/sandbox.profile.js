@@ -21,6 +21,9 @@ dependencies ={
         {
             name: "sandbox.js",
             resourceName: 'sandbox.dojo',
+            layerDependencies: [
+                'dojodeps.js'
+            ],
             dependencies: [
 				"sandbox.Frontend"
             ],
@@ -29,6 +32,9 @@ dependencies ={
 	{
             name: "designer.js",
             resourceName: 'designer.dojo',
+            layerDependencies: [
+                'dojodeps.js'
+            ],
             dependencies: [
 		"wuhi.designer.Designer",
 		"wuhi.designer.dijit.form.TextBox",

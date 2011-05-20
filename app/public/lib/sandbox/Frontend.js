@@ -1,7 +1,6 @@
 dojo.provide("sandbox.Frontend");
 
 dojo.require("dijit._Templated");
-dojo.require("dijit.layout.ContentPane");
 dojo.require("dijit.layout.BorderContainer");
 dojo.require("dijit.Toolbar");
 dojo.require("dijit.form.Button");
@@ -14,7 +13,7 @@ dojo.require("dijit.form.DropDownButton");
 dojo.require("sandbox.frontend.EditorTab");
 dojo.require("sandbox.frontend.SetupPane");
 
-dojo.declare("sandbox.Frontend", [dijit.layout.ContentPane, dijit._Templated], {
+dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 
 	widgetsInTemplate: true,
 	templateString: dojo.cache("sandbox", "templates/Frontend.html"),
@@ -46,10 +45,6 @@ dojo.declare("sandbox.Frontend", [dijit.layout.ContentPane, dijit._Templated], {
 
 		this.editorTab.frontend = this;
 		this.setupPane.frontend = this;
-	},
-
-	startup: function () {
-		this.inherited(arguments);
 	},
 
 	_getEditorItem: function (id) {

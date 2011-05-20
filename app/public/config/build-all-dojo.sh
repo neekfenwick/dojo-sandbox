@@ -10,6 +10,12 @@ fi
 
 function buildAVersion() {
 	VERSION=$1
+	echo Test ../lib/dojo-$VERSION ...
+	if [[ -e ../lib/dojo-$VERSION ]] ; then
+		echo Version $VERSION already built!
+		return
+	fi
+
 	BUILDSCRIPTS=../lib/dojo-release-$VERSION-src/util/buildscripts
 	if [[ ! -e $BUILDSCRIPTS ]] ; then
 		echo Cannot find buildscripts dir $BUILDSCRIPTS
@@ -31,6 +37,7 @@ function buildAVersion() {
 
 buildAVersion "1.4.3"
 buildAVersion "1.5.0"
+buildAVersion "1.5.1"
 buildAVersion "1.6.0"
 buildAVersion "1.6.1"
 
