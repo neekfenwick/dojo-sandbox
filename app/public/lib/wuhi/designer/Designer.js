@@ -55,7 +55,7 @@ dojo.declare("wuhi.designer.Designer", [dijit.layout.ContentPane, dijit._Templat
 
 					var entry = dojo.create("div", {"dndType": proto.dojoClass, "dojoClass": proto.dojoClass});
 					var cellLeft = dojo.create("div", {"style": {"float": "left", "width": "20px"}}, entry);
-					var img = dojo.create("img", {"src": "img/" + proto._toolboxImg}, cellLeft);
+					var img = dojo.create("img", {"src": "/img/" + proto._toolboxImg}, cellLeft);
 					var cellRight = dojo.create("div", {"innerHTML": proto.dojoClass}, entry);
 					
 					dojo.addClass(entry, "dojoDndItem");
