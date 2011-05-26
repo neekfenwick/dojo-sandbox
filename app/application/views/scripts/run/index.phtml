@@ -11,10 +11,10 @@ if (isset($this->layers) && strlen($this->layers) > 0) {
     if (strpos($layerName, 'dijit-all.js') > 0) {
       echo '  <!-- auto-inserted dijit.js dependency to satisfy dijit-all.js -->' . "\n" .
         '  <script type="text/javascript" ' .
-        'src="/lib/' . $this->dojo_base_dir . '/dijit/dijit.js"></script>' . "\n";
+        'src="' . $this->dojo_base_dir . '/dijit/dijit.js"></script>' . "\n";
     }
     echo '  <script type="text/javascript" ' .
-      'src="/lib/' . $this->dojo_base_dir . '/' . $layerName . '"></script>' . "\n";
+      'src="' . $this->dojo_base_dir . '/' . $layerName . '"></script>' . "\n";
   }
 }
 ?>
