@@ -13,4 +13,4 @@ if [[ $R != 0 ]] ; then
 fi
 
 rm -rf ./dojo-daily
-mv dojo-trunk-tmp/dojotoolkit/release/dojo ./dojo-daily
+mv dojo-trunk-tmp/dojotoolkit/release/dojo ./0.0.0-trunk
