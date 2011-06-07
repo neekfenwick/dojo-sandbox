@@ -2,7 +2,7 @@
 
 # Use the same dir each time so svn doesn't have to re-fetch too much
 TMPDIR=/tmp/dojo-trunk
-BUILDSTAMP=`date +%Y-%m-%d:%H-%M`
+BUILDSTAMP=`date +%Y%m%dT%H%M`
 echo BUILDSTAMP $BUILDSTAMP
 
 function fetch() {
@@ -28,20 +28,20 @@ function fetch() {
 
 function build() {
 	echo Building for $1
-	if [[ ! -x $1/util/buildscripts/build.sh ]] ; then
+	if [[ ! -x $1/util/build/build.sh ]] ; then
 		echo Cannot find build.sh for $1!
 		exit 1;
 	fi
-	pushd $1/util/buildscripts
+	pushd $1/util/build
 	VERSION=$2-$BUILDSTAMP
 echo VERSION: $VERSION
-	echo ./build.sh profile=standard releaseName=dojo-$2 version=${VERSION}-standard releaseDir=../../.. optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
-	./build.sh profile=standard releaseName=dojo-$2 version=${VERSION}-standard releaseDir=../../../release/wibble-$2 optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
+	echo ./build.sh profile=standard releaseName=dojo-$2 version=${VERSION}standard releaseDir=../../.. optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
+	./build.sh profile=standard releaseName=dojo-$2 version=${VERSION}standard releaseDir=../../../release/wibble-$2 optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
 	if [[ $? != 0 ]] ; then
 		echo Build failed for $1!
 		exit 1
 	fi
-	./build.sh profile=standard releaseName=dojo-$2-nooptimize version=${VERSION}-standard-nooptimize releaseDir=../../../release/wibble-nooptimize-$2 optimize=none cssOptimize=none layerOptimize=none stripConsole=none action=clean,release
+	./build.sh profile=standard releaseName=dojo-$2-nooptimize version=${VERSION}standard-nooptimize releaseDir=../../../release/wibble-nooptimize-$2 action=clean,release
 	if [[ $? != 0 ]] ; then
 		echo Build failed for $1 nooptimize!
 		exit 1
