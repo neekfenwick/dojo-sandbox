@@ -144,7 +144,7 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated], {
 
 	/* Launch a new window with the bucket referred to in the provided response */
 	launchForDebug: function(response) {
-		window.open(this.generateUrl(response));//"/backend/run/index/session_id/" + response.session_id;
+		window.open(this.generateUrl(response), 'SandboxDebug', "resizable=yes,scrollbars=yes,status=yes");//"/backend/run/index/session_id/" + response.session_id;
 	},
 
 	// Convenience method to gather a lump of data about the current bucket
