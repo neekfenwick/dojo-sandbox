@@ -28,7 +28,7 @@ class ConfigController extends Zend_Rest_Controller
     while($entryName = readdir($dir)) {
       // match those we want to make available
       if (preg_match('/^dojo-([0-9].*)$/', $entryName, $matches) > 0 ||
-	preg_match('/^(0.0.0-trunk)$/', $entryName, $matches) > 0) {
+	preg_match('/^dojo-(0.0.0-trunk.*)$/', $entryName, $matches) > 0) {
         if (preg_match('/sandbox/', $matches[1]) == 0) {
           $versions[] = $matches[1];
         }

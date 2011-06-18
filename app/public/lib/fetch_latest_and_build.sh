@@ -28,20 +28,23 @@ function fetch() {
 
 function build() {
 	echo Building for $1
-	if [[ ! -x $1/util/build/build.sh ]] ; then
-		echo Cannot find build.sh for $1!
-		exit 1;
-	fi
+	#if [[ ! -x $1/util/build/build.sh ]] ; then
+		#echo Cannot find build.sh for $1!
+		#exit 1;
+	#fi
 	pushd $1/util/build
 	VERSION=$2-$BUILDSTAMP
 echo VERSION: $VERSION
-	echo ./build.sh profile=standard releaseName=dojo-$2 version=${VERSION}standard releaseDir=../../.. optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
-	./build.sh profile=standard releaseName=dojo-$2 version=${VERSION}standard releaseDir=../../../release/wibble-$2 optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
+	#echo java -Xms256m -Xmx256m  -cp ../shrinksafe/js.jar:../closureCompiler/compiler.jar:../shrinksafe/shrinksafe.jar org.mozilla.javascript.tools.shell.Main  ../../dojo/dojo.js baseUrl=../../dojo load=build profile=standard releaseName=0.0.0-$2 version=${VERSION}standard optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
+	echo /opt/bin/node ../../dojo/dojo.js load=build profile=standard releaseName=0.0.0-$2 version=${VERSION}standard optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
+	#java -Xms256m -Xmx256m  -cp ../shrinksafe/js.jar:../closureCompiler/compiler.jar:../shrinksafe/shrinksafe.jar org.mozilla.javascript.tools.shell.Main  ../../dojo/dojo.js baseUrl=../../dojo load=build profile=standard releaseName=$2 version=${VERSION}standard optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
+	/opt/bin/node ../../dojo/dojo.js load=build profile=standard releaseName=$2 version=${VERSION}standard optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
 	if [[ $? != 0 ]] ; then
 		echo Build failed for $1!
 		exit 1
 	fi
-	./build.sh profile=standard releaseName=dojo-$2-nooptimize version=${VERSION}standard-nooptimize releaseDir=../../../release/wibble-nooptimize-$2 action=clean,release
+	#java -Xms256m -Xmx256m  -cp ../shrinksafe/js.jar:../closureCompiler/compiler.jar:../shrinksafe/shrinksafe.jar org.mozilla.javascript.tools.shell.Main  ../../dojo/dojo.js baseUrl=../../dojo load=build profile=standard releaseName=$2-nooptimize version=${VERSION}standard-nooptimize action=clean,release
+	/opt/bin/node ../../dojo/dojo.js load=build profile=standard releaseName=$2-nooptimize version=${VERSION}standard-nooptimize action=clean,release
 	if [[ $? != 0 ]] ; then
 		echo Build failed for $1 nooptimize!
 		exit 1
@@ -52,23 +55,25 @@ echo VERSION: $VERSION
 
 function deploy() {
 
-	RELEASE_DIR=$1/release/dojo-$1
+	RELEASE_DIR=$1/release/$2
 	if [[ ! -d $RELEASE_DIR ]] ; then
 		echo Build not found at $RELEASE_DIR
 		exit 1
 	fi
 
-	echo Deploying build from $RELEASE_DIR to dojo-trunk-$1...
-	cp -r $1/release/dojo-$1 dojo-trunk-$1
+	echo Deploying build from $RELEASE_DIR...
+	rm -rf ../$2
+	mv $RELEASE_DIR ../
 
-	RELEASE_DIR=$1/release/dojo-$1-nooptimize
+	RELEASE_DIR=$1/release/$2-nooptimize
 	if [[ ! -d $RELEASE_DIR ]] ; then
 		echo Build not found at $RELEASE_DIR
 		exit 1
 	fi
 
-	echo Deploying build from $RELEASE_DIR to dojo-trunk-$1-nooptimize...
-	cp -r $RELEASE_DIR dojo-trunk-$1-nooptimize
+	echo Deploying build from $RELEASE_DIR...
+	rm -rf ../$2-nooptimize
+	mv $RELEASE_DIR ../
 
 }
 
@@ -79,7 +84,7 @@ pushd dojo-trunk-tmp
 
 fetch "dojotoolkit" "trunk";
 
-build "dojotoolkit" "trunk";
+build "dojotoolkit" "dojo-0.0.0-trunk";
 
-deploy "dojotoolkit" "trunk";
+deploy "dojotoolkit" "dojo-0.0.0-trunk";
 popd
