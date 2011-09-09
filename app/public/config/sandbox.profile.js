@@ -14,7 +14,8 @@ dependencies ={
                 "dijit.Toolbar",
                 "dijit.form.Button",
                 "dijit.form.ValidationTextBox",
-		"dojox.data.JsonRestStore"
+		"dojox.data.JsonRestStore",
+		"dojox.widget.Dialog",
             ],
             copyrightFile: 'sandboxCopyright.txt'
         },

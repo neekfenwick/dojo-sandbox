@@ -15,6 +15,9 @@ RewriteRule ^run/index/namespace/([A-Za-z0-9]+)/id/([A-Za-z0-9]+)/version/([A-Za
 
 RewriteRule ^run/index/session_id/([A-Za-z0-9]+)$ /backend/index.php?controller=run&action=index&session_id=$1 [R=301,NC,L]
 
+#RewriteRule ^login/([A-Za-z0-9]+)/id/([A-Za-z0-9]+)/version/([A-Za-z0-9]+\.(xml|html|json))/?$ /backend/index.php?controller=file&action=get&namespace=$1
+
+#RewriteCond !%{REQUEST_FILENAME] /login
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule .* - [L]

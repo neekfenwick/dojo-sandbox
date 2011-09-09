@@ -2,14 +2,14 @@ dojo.provide("sandbox.frontend.SetupPane");
 
 dojo.require("dijit._Templated");
 dojo.require("dijit.layout.ContentPane");
-
+dojo.require("dijit.form.TextBox");
+dojo.require("dijit.form.Textarea");
 
 dojo.declare("sandbox.frontend.SetupPane", [dijit.layout.ContentPane, dijit._Templated], {
 	templateString: dojo.cache("sandbox", "frontend/templates/SetupPane.html"),
 	widgetsInTemplate: true,
 	
 	_layersCBs: [],
-	_userInfo: undefined,
 	frontend: null,
 	
 	startup: function(){
@@ -40,6 +40,15 @@ dojo.declare("sandbox.frontend.SetupPane", [dijit.layout.ContentPane, dijit._Tem
 	},
 	_updateBucketInfo: function(bucketInfo) {
 		this.frontend._bucketInfo = dojo.mixin(this.frontend._bucketInfo, bucketInfo);
+		// 'name' and 'description' will be provided when loading a bucket.
+		//  When saving an existing bucket, they may not be and must be left
+		//  with their old values if not.
+		if (bucketInfo.hasOwnProperty('name')) {
+			this.bucketNameNode.set('value', bucketInfo.name);
+		}
+		if (bucketInfo.hasOwnProperty('description')) {
+			this.bucketDescriptionNode.set('value', bucketInfo.description);
+		}
 		dojo.attr(this.bucketNamespaceNode, 'innerHTML', bucketInfo.namespace);
 		dojo.attr(this.bucketIdNode, 'innerHTML', bucketInfo.id);
 		dojo.attr(this.bucketVersionNode, 'innerHTML', bucketInfo.version);
@@ -115,43 +124,9 @@ dojo.declare("sandbox.frontend.SetupPane", [dijit.layout.ContentPane, dijit._Tem
 					}
 				}));
 
-				// cookie should have stored username of last logged on user
-				// If so, do a sync request to validate user.
-				// @TODO: make this non sync. for now, it's easier to do it sync.
-				var usercookie = dojo.cookie('dojo-sandbox');
-				if (usercookie) {
-					this._userInfo = dojo.objectFromQuery(usercookie);
-					console.log("userdata: ", this._userInfo);
-
-					if (this._userInfo && this._userInfo.username) {
-						dojo.xhrGet({
-							url: '/backend/security',
-							sync: true,
-							content: {
-								action: 'validateToken',
-								username: this._userInfo.username,
-								token: this._userInfo.token
-							},
-							handleAs: 'json',
-							load: dojo.hitch(this, function (response) {
-								console.log("validateSecurity response: ", response);
-
-							}),
-							error: dojo.hitch(this, function (response) {
-								console.log("validateSecurity ERROR: ", response);
-								this._userInfo = undefined;
-							})
-						});
-					}
-				}
-
-				// At this point we may be logged in or not.
-				// Update the UI for our this._userInfo
-				this._updateUserinfoNode();
-
 				// inspect the location and see if we have to load a bucket
 				var pn = window.location.pathname;
-				var bucketRequest = dojo.mixin(this._userInfo, {});
+				var bucketRequest = {};
 
 				var re1 = new RegExp("^\/([^/]+)$");
 				var re2 = new RegExp("^\/([^/]+)\/([^/]+)$");
@@ -187,6 +162,11 @@ dojo.declare("sandbox.frontend.SetupPane", [dijit.layout.ContentPane, dijit._Tem
 				}
 
 				if (bucketRequest && bucketRequest.namespace && bucketRequest.id && bucketRequest.version) {
+
+					if (this.frontend.credentials && this.frontend.credentials.token) {
+						bucketRequest.token = this.frontend.credentials.token;
+					}
+
 					console.log("Requesting: ", bucketRequest);
 
 					dojo.xhrGet({
@@ -199,11 +179,13 @@ dojo.declare("sandbox.frontend.SetupPane", [dijit.layout.ContentPane, dijit._Tem
 								window.alert("Error from server! " + response.message);
 							} else {
 		
-								this._updateBucketInfo({
+								this._updateBucketInfo(response);/*{
+									name: response.name,
+									description: response.description,
 									namespace: response.namespace,
 									id: response.id,
 									version: response.version
-								});
+								});*/
 
 								var setValueFn = function(response, responseField, editor) {
 									editor.setValue(response[responseField]);
@@ -251,24 +233,6 @@ dojo.declare("sandbox.frontend.SetupPane", [dijit.layout.ContentPane, dijit._Tem
 		});
 		
 		return layers;
-	},
-	
-	_updateUserinfoNode: function() {
-		dojo.empty(this.frontend.userInfoNode);
-		var b;
-		if (this._userInfo && this._userInfo.username) {
-			dojo.attr(this.userInfoNode, 'innerHTML', '<span class="userinfo">Logged on as; <span class="username">' + this._userInfo.username + "</span></span>");
-			b = new dijit.form.Button({
-				label: 'Logout',
-				onClick: dojo.hitch(this.frontend, "_logoutClick")
-			});
-			b.placeAt(this.frontend.userInfoNode);
-		} else {
-			b = new dijit.form.Button({
-				label: 'Login',
-				onClick: dojo.hitch(this.frontend, "_loginClick")
-			});
-			b.placeAt(this.frontend.userInfoNode);
-		}
 	}
+	
 });

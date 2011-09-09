@@ -2,6 +2,9 @@
 
 include_once('BaseController.php');
 
+class SecurityException extends Exception {
+}
+
 class RunController extends BaseController {
 
   /*
@@ -154,14 +157,49 @@ class RunController extends BaseController {
     if (isset($_REQUEST['save_as_new'])) {
 
       // We may not have been passed any identifying info
+      $token = $this->getRequest()->getParam("token");
       $namespace = $this->getRequest()->getParam("namespace");
       $id = $this->getRequest()->getParam("id");
       $version = $this->getRequest()->getParam("version");
       self::$logger->info("postAction namespace ($namespace) id ($id) version ($version)");
+      
+      // sanitize $namespace - may be empty for new buckets
       if (!isset($namespace) || $namespace == '') {
-        self::$logger->info("namespace not provided, default to 'public'");
-        $namespace = 'public';
+          self::$logger->debug("namespace not set.  Check token ($token)");
+          if (isset($token) && $token != '') {
+              $select = $db	->select('username')
+                            ->from('user')
+                            ->where('token = ?', $token);
+              $token_rs = $db->fetchRow($select);
+              if ($token_rs) {
+                  $namespace = $token_rs->username;
+                  self::$logger->info("token provided, going to use namespace $namespace");
+              } else {
+                  self::$logger->emerg("Token ($token) could not be found in the database!");
+                  $namespace = 'public';
+              }
+          } else {
+            self::$logger->info("namespace not provided, default to 'public'");
+            $namespace = 'public';
+          }
       }
+      
+      // If namespace is not 'public', verify that the provided token is valid
+      if ($namespace != 'public') {
+          self::$logger->debug("Verifying token ($token) for namespace ($namespace)...");
+          if (!isset($token)) {
+              self::$logger->debug("Token not provided! Barf.");
+              throw new SecurityException('Invalid token');
+          }
+          $select = $db->select('token')->from('user')->where('username = ?', $namespace);
+          $token_rs = $db->fetchRow($select);
+          if (!$token_rs || $token_rs->token != $token) {
+              self::$logger->debug("Token ($token) should be (" . $token_rs->token . ") for namespace ($namespace)! Barf.");
+              throw new SecurityException('Invalid token');
+          }
+          self::$logger->debug("token verified OK.");
+      }
+      
       if (!isset($id) || $id == '') {
         self::$logger->info("id not provided, generating new random id");
         $accepted = false;

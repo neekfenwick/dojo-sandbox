@@ -30,7 +30,7 @@ popd
 # --------------- dojo $VERSION ---------------
 }
 
-build_a_version '1.5.1'
+#build_a_version '1.5.1'
 build_a_version '1.6.1'
 
 

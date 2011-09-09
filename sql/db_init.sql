@@ -12,10 +12,13 @@ DROP TABLE IF EXISTS user;
 CREATE TABLE user (
   id int NOT NULL AUTO_INCREMENT,
   username VARCHAR(20) NOT NULL,   -- unique username
+  password VARCHAR(20) NOT NULL,   -- hashed password
   role VARCHAR(10) NOT NULL,       -- e.g. 'user', 'admin'
   first_name TINYTEXT NOT NULL,
   last_name TINYTEXT NOT NULL,
   email TINYTEXT NOT NULL,
+  created DATETIME NOT NULL,
+  last_modified DATETIME NOT NULL,
   primary key (id),
   INDEX (username)
 ) ENGINE= MyISAM DEFAULT CHARSET = UTF8;
@@ -28,6 +31,8 @@ CREATE TABLE bucket (
   name TINYTEXT NOT NULL,         -- free text name of bucket
   description TEXT NOT NULL,      -- free text longer description of bucket
   latest_version int NOT NULL,    -- refers to bucket_version.version
+  created DATETIME NOT NULL,
+  last_modified DATETIME NOT NULL,
   primary key (namespace, id)
 ) ENGINE= MyISAM DEFAULT CHARSET = UTF8;
 
@@ -44,6 +49,8 @@ CREATE TABLE bucket_version (
   content_css TEXT NOT NULL,
   dj_config TEXT NOT NULL,
   layers TEXT NOT NULL,                  -- '##' separated layer names
+  created DATETIME NOT NULL,
+  last_modified DATETIME NOT NULL,
   primary key (bucket_namespace, bucket_id, version)
 ) ENGINE= MyISAM DEFAULT CHARSET = UTF8;
 
@@ -76,6 +83,8 @@ CREATE TABLE bucket_resource (
   bucket_version int NOT NULL,
   type TINYTEXT NOT NULL, -- 'css'
   href TINYTEXT NOT NULL, -- e.g. 'dojo/resources/dojo.css',
+  created DATETIME NOT NULL,
+  last_modified DATETIME NOT NULL,
   primary key (id)
 ) ENGINE= MyISAM DEFAULT CHARSET = UTF8;
 
@@ -94,3 +103,9 @@ VALUES
 '<div dojoType="dijit.form.TextBox" id="tb"></div>',
 'dojo.require("dijit.form.TextBox"); dojo.ready(function() {   dijit.byId("tb").set("value", "dynamically set"); });',
 '', 'parseOnLoad: true', 'dijit-all');
+
+-- Update 26 Jun 2011
+ALTER TABLE bucket_resource ADD COLUMN created DATETIME NOT NULL;
+ALTER TABLE bucket_resource ADD COLUMN last_modified DATETIME NOT NULL;
+update bucket_resource set created = now();
+update bucket_resource set last_modified = now();

@@ -1,6 +1,7 @@
 <?php
 
 include_once('BaseController.php');
+include_once('helpers/SecurityUtils.php');
 
 class BucketController extends BaseController
 {
@@ -23,12 +24,24 @@ class BucketController extends BaseController
 	// Handle GET and return a specific resource item
 	public function getAction() {
 	
-		//@TODO: handle the query with $this->_getParam(...)
+    //@TODO: handle the query with $this->_getParam(...)
     $db = $this->_helper->database->getAdapter();
     $namespace = $this->getRequest()->getParam("namespace");
     $id = $this->getRequest()->getParam("id");
     self::$logger->info("index fetching bucket namespace ($namespace) id ($id)");
 
+    if ($namespace != 'public') {
+        $token = $this->getRequest()->getParam('token');
+        self::$logger->debug("namespace is not public, validate token ($token)...");
+        
+        $token_username = SecurityUtils::getUsernameForToken($db, $token);
+        if ($token_username != $namespace) {
+            self::$logger->info("Token failed validation, token_username ($token_username) does not match namespace ($namespace).");
+            throw new SecurityException("Token does not match namespace user");
+        }
+        self::$logger->debug("token validated OK for username ($token_username).");
+    }
+    
     $select = $db->select()
           ->from('bucket', array('name', 'description', 'latest_version'))
           ->where('namespace = ?', $namespace)

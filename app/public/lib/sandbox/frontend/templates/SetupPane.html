@@ -4,9 +4,29 @@
 	<table class="bucketInfoTable">
 		<tbody>
 			<tr>
-				<td class="infoLabel">Namespace:</span></td>
+				<td class="infoLabel" style="text-align: left" colspan="2">Name:</td>
+			</tr>
+			<tr>
+				<td class="infoValue" colspan="2">
+					<input data-dojo-type="dijit.form.TextBox"
+						   data-dojo-attach-point="bucketNameNode"
+						   data-dojo-props="style: 'width: 99%'"/>
+				</td>
+			</tr>
+			<tr>
+				<td class="infoLabel" style="text-align: left" colspan="2">Description</td>
+			</tr>
+			<tr>
+				<td class="infoValue" colspan="2">
+					<input data-dojo-type="dijit.form.Textarea"
+						   data-dojo-attach-point="bucketDescriptionNode"
+						   data-dojo-props="style: 'width: 100%'"/>
+				</td>
+			</tr>
+			<tr>
+				<td class="infoLabel">Namespace:</td>
 				<td class="infoValue">
-					<span dojoAttachPoint="bucketNamespaceNode"></span>
+					<span dojoAttachPoint="bucketNamespaceNode">
 				</td>
 			</tr>
 			<tr>

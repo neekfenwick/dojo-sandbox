@@ -12,7 +12,6 @@ html, body, .frontend {
 
 .versionInfo{
 	color: #969696;
-	display: inline-block;
 	vertical-align: middle;
 }
 
@@ -21,6 +20,32 @@ html, body, .frontend {
 	float: right;
 }
 
+.userInfoNode .username {
+	color: green;
+	font-weight: bold;
+}
+
+/* Login form */
+#loginDlg FIELDSET {
+    border: 1px solid black;
+    padding: 0.4em;
+}
+#loginDlg LEGEND {
+    margin-left: 2em;
+}
+#loginDlg LABEL {
+    display: inline-block;
+    width: 8em;
+}
+#loginDlg P {
+    margin: 0;
+}
+#loginDlg #login_username,
+#loginDlg #login_password {
+    font-size: 2em;
+}
+
+/* Left hand pane pieces */
 .bucketInfo H1 {
 	text-align: center;
 	margin-top: 0;

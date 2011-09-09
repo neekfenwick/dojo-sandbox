@@ -41,6 +41,7 @@ $no_designer_layer = (isset($_REQUEST['nodesignerlayer']) && $_REQUEST['nodesign
 <?php } ?>
   <script type="text/javascript" src="<?php echo $lib_path; ?>/wuhi/ExtendedDnd.js"></script>
   <link rel="stylesheet" href="<?php echo $dojo_path; ?>/dojo/resources/dojo.css">
+  <link rel="stylesheet" href="<?php echo $dojo_path; ?>/dojox/widget/Dialog/Dialog.css">
   <link rel="stylesheet" href="<?php echo $dojo_path; ?>/dijit/themes/claro/claro.css">
   <link rel="stylesheet" href="<?php echo $lib_path; ?>/sandbox/sandbox.css">
   <!-- designer stuff -->
@@ -81,9 +82,89 @@ $no_designer_layer = (isset($_REQUEST['nodesignerlayer']) && $_REQUEST['nodesign
 	dojo.require("wuhi.designer.dijit.MenuItem");
 	dojo.require("wuhi.designer.dijit.PopupMenuItem");
 	dojo.require("dojox.fx");
+    dojo.require("dojo.fx");
+    dojo.require("dojox.validate.regexp");
   </script>
 </head>
 <body class="claro">
-  <div dojoType="sandbox.Frontend" class="frontend"></div>
+  <div dojoType="sandbox.Frontend" class="frontend"<?php
+    if (array_key_exists('token', $_COOKIE))
+            echo " credentials='{token: \"" . $_COOKIE['token'] . "\"}'";
+    error_log("DEBUG changelog mtime: " . filemtime('changelog.html'));
+    // If there is no cookie, or the cookie exists but has a value less than the changelog mod time..
+    if (!array_key_exists('lastviewedchangelog', $_COOKIE) ||
+            $_COOKIE['lastviewedchangelog'] < filemtime('changelog.html')) {
+        setcookie('lastviewedchangelog', time(), time() + 3600*24*7*30, '/');
+        echo " showChangelog='true'";
+    }
+  ?>></div>
+  <div id="loginDialog" style="display: none">
+      <!-- want to redir to: https://<?php echo $_SERVER['SERVER_NAME']?>
+      BUT currently cannot host https for dojo-sandbox as it's a shared server. -->
+      <!-- form method="POST" action="/backend/login" -->
+    <div id="dijitDialogPaneContentArea">
+      <fieldset id="loginFields"><legend>Log in</legend>
+          <label for="login_username">Username:</label>
+          <div dojoType="dijit.form.ValidationTextBox" required="true"
+            id="login_username" name="username" promptMessage="username"></div><br/>
+          <label for="login_password">Password:</label>
+          <div dojoType="dijit.form.ValidationTextBox" required="true"
+            id="login_password" name="password" type="password"></div>
+      </fieldset>
+        <div data-dojo-type="dijit.form.CheckBox" data-dojo-props="name:'register'" id="registerCB">
+            <script type="dojo/event" event="onClick" args="e">
+                console.log("Register clicked! ", e, " value ", e.target.value, " this ", this, " value ", this.get('value'));
+                var req = function(val) {
+                    dojo.map([ 'login_firstname', 'login_lastname', 'login_email' ], function(id) {
+                    console.log("set id " + id + " to " + val);
+                    dijit.byId(id).set('required', val);
+                    });
+                };
+                if (this.get('value') !== false) {
+                    dijit.byId('loginSubmit').set('label', 'Register new account');
+                    req(true);
+                    dojo.fx.wipeIn( { node: 'loginRegisterFields',
+                      onEnd: function() {
+                        dijit.byId('loginDlg').layout();
+                      }
+                    }).play();
+                } else {
+                    dijit.byId('loginSubmit').set('label', 'Login');
+                    req(false);
+                    dojo.fx.wipeOut( { node: 'loginRegisterFields',
+                      onEnd: function() {
+                        dijit.byId('loginDlg').layout();
+                      }
+                    }).play();
+                }
+            </script>
+        </div>
+        <label for="registerCB" style="width: auto;">Register a New Account</label>
+        <div style="display:none;" id="loginRegisterFields">
+          <fieldset><legend>New Account Details</legend>
+            <p>Creating a new account is as simple as filling in these fields as you log in.</p>
+            <p>Please fill in <b>both</b> the username and password fields above <b>and</b> the fields below.</p>
+            <label for="login_firstname">First Name:</label>
+            <div dojoType="dijit.form.ValidationTextBox"
+                 style="display: inline-block;"
+              id="login_firstname" name="first_name" promptMessage="Your first name..."></div><br/>
+            <label for="login_lastname">Last Name:</label>
+            <div dojoType="dijit.form.ValidationTextBox"
+              id="login_lastname" name="last_name" promptMessage="Your last name..."></div>
+            <label for="login_email">Email:</label>
+            <div dojoType="dijit.form.ValidationTextBox"
+              rexExpGen="dojox.validate.regexp.emailAddress"
+              id="login_email" name="email" promptMessage="Your email address..."></div>
+          </fieldset>
+        </div>
+        <div style="display: none;" id="loginFeedback"></div>
+    </div>
+    <div class="dijitDialogPaneActionBar">
+      <button id="loginSubmit" data-dojo-type="dijit.form.Button" data-dojo-props='type:"submit", name:"loginButton", value:"login", onClick:function() { return dijit.byId("loginDlg").validate(); }'>OK</button>
+      <button data-dojo-type="dijit.form.Button" data-dojo-props='type:"button", onClick:function(){ dijit.byId("loginDlg").onCancel(); } '>Cancel</button>
+    </div>
+      <!-- /form -->
+  </div>
+      
 </body>
 </html>
