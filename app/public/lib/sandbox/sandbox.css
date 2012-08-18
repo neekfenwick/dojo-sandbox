@@ -98,3 +98,22 @@ html, body, .frontend {
 .sandboxIconDesigner{
 	background-image:url(img/designer.png);
 }
+/* Dialog styles, see _DialogUtilsMixin */
+.dialogImg {
+	display: inline-block;
+	width: 128px;
+	height: 128px;
+	vertical-align: middle;
+}
+.errorDialogImg {
+	background: url('frontend/resources/Negative-icon.png');
+}
+.okDialogImg {
+	background: url('frontend/resources/Positive-icon.png');
+}
+.questionDialogImg {
+	background: url('frontend/resources/Help-icon.png');
+}
+.dialogText {
+	font-size: 1.5em;
+}

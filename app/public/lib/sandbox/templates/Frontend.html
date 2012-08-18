@@ -2,11 +2,16 @@
 	<div dojoType="dijit.layout.BorderContainer" gutters="false" dojoAttachPoint="mainBorderContainer" style="height: 100%; width: 100%;">
 		<div dojoType="dijit.layout.ContentPane" region="top">
 			<div dojoType="dijit.Toolbar">
-				<div dojoAttachPoint="userInfoNode" class="userInfoNode"></div>
+				<div dojoAttachPoint="userInfoNode" class="userInfoNode dijitButton dijitButtonNode"></div>
 				<div dojoType="dijit.form.Button" label="Update" dojoAttachEvent="onClick: _updateClick"></div>
 				<div dojoType="dijit.form.Button" label="Save As New" dojoAttachEvent="onClick: _saveasnewClick"></div>
 				<div dojoType="dijit.form.Button" label="Delete" dojoAttachEvent="onClick: _deleteClick"></div>
-				<div class="dijitInline versionInfo"><span dojoAttachPoint="versionInfoNode"></span><div dojoType="dijit.form.Button" title="See a list of what has changed in the dojo-sandbox app." label="Changelog" dojoAttachEvent="onClick: _changelogClick"></div></div>
+				<div class="dijitInline versionInfo"
+					 ><span class="dijitButton dijitButtonNode" dojoAttachPoint="versionInfoNode"
+					 ></span><div dojoType="dijit.form.Button"
+						 title="See a list of what has changed in the dojo-sandbox app."
+						 label="Changelog" dojoAttachEvent="onClick: _changelogClick"
+				></div></div>
 			</div>
 		</div>
 		<div dojoType="sandbox.frontend.SetupPane" region="left" splitter="true" style="width: 170px;" dojoAttachPoint="setupPane" class="bucketInfo">			

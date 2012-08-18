@@ -28,7 +28,7 @@ dojo.declare("sandbox.frontend._LoginMixin", null, {
 						this.credentials.username = response.username;
 						this.setupForUser();
 					} else {
-						alert("Token validation failed (" + response.message + ")");
+						console.log("Token validation failed (" + response.message + ")");
 						delete this.credentials.token;
 					}
 				}),

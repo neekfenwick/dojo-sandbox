@@ -14,8 +14,9 @@ dojo.require("dojox.widget.Dialog");
 dojo.require("sandbox.frontend.EditorTab");
 dojo.require("sandbox.frontend.SetupPane");
 dojo.require("sandbox.frontend._LoginMixin");
+dojo.require("sandbox.frontend._DialogUtilsMixin");
 
-dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated, sandbox.frontend._LoginMixin], {
+dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated, sandbox.frontend._LoginMixin, sandbox.frontend._DialogUtilsMixin], {
 
 	widgetsInTemplate: true,
 	templateString: dojo.cache("sandbox", "templates/Frontend.html"),
@@ -137,11 +138,41 @@ dojo.declare("sandbox.Frontend", [dijit._Widget, dijit._Templated, sandbox.front
 			"content": request,
 			"handleAs": "json",
 			"load": dojo.hitch(this, function (response) {
-				this._genericSaveHandler(response, handler);
+				if (response.success === true) {
+					this._genericSaveHandler(response, handler);
+				} else {
+					if (response.exception && response.exception === 'SecurityException') {
+						console.log("Handle error: ", response);
+						if (response.message && response.message === 'Invalid token') {
+							//this.raiseErrorDialog("Security violation", "Your token was invalid");
+							this.raiseQuestionDialog("Cannot save .. fork?", "Your token was invalid.  You are trying to save a bucket belonging to another user.  Would you like to fork this bucket instead?",
+							dojo.hitch(this, function(answer) {
+								console.log("Got yesno answer: ", answer);
+							}))
+						}
+					} else {
+						this.raiseErrorDialog("Error", "An unhandled " +
+							response.exception + " exception occurred; " + response.message);
+					}
+				}
 			}),
-			"error": function (response) {
+			"error": dojo.hitch(this, function (response) {
 				console.log("ERROR: ", response, "..", response.responseText);
-			}
+				if (response.responseText) {
+					try {
+						var responseObj = dojo.fromJson(response.responseText);
+						if (responseObj.exceptionMessage && responseObj.exceptionMessage === 'Invalid token') {
+							//this.raiseErrorDialog("Security violation", "Your token was invalid");
+							this.raiseQuestionDialog("Cannot save .. fork?", "Your token was invalid.  You are trying to save a bucket belonging to another user.  Would you like to fork this bucket instead?",
+							dojo.hitch(this, function(answer) {
+								console.log("Got yesno answer: ", answer);
+							}))
+						}
+					} catch (e) {
+						console.error("Error parsing response json: ", e);
+					}
+				}
+			})
 		});
 
 	},

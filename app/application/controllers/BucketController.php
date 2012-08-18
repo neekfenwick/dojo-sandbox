@@ -30,17 +30,22 @@ class BucketController extends BaseController
     $id = $this->getRequest()->getParam("id");
     self::$logger->info("index fetching bucket namespace ($namespace) id ($id)");
 
-    if ($namespace != 'public') {
-        $token = $this->getRequest()->getParam('token');
-        self::$logger->debug("namespace is not public, validate token ($token)...");
-        
-        $token_username = SecurityUtils::getUsernameForToken($db, $token);
-        if ($token_username != $namespace) {
-            self::$logger->info("Token failed validation, token_username ($token_username) does not match namespace ($namespace).");
-            throw new SecurityException("Token does not match namespace user");
-        }
-        self::$logger->debug("token validated OK for username ($token_username).");
-    }
+// TODO: remove this block once we're happy validating tokens is completely useless here.
+//    if ($namespace != 'public') {
+//        $token = $this->getRequest()->getParam('token');
+//        if ($token != null && strlen($token) > 0) {
+//            self::$logger->debug("namespace is not public, validate token ($token)...");
+//
+//            $token_username = SecurityUtils::getUsernameForToken($db, $token);
+//            if ($token_username != $namespace) {
+//                self::$logger->info("Token failed validation, token_username ($token_username) does not match namespace ($namespace).");
+//                throw new SecurityException("Token does not match namespace user");
+//            }
+//            self::$logger->debug("token validated OK for username ($token_username).");
+//        } else {
+//            self::$logger->debug("namespace is not public and no token provided.  Carry on.");
+//        }
+//    }
     
     $select = $db->select()
           ->from('bucket', array('name', 'description', 'latest_version'))

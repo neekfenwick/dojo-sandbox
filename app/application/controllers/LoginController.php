@@ -1,6 +1,7 @@
 <?php
 
 include_once('BaseController.php');
+include_once('helpers/SecurityUtils.php');
 
 class LoginController extends BaseController
 {
@@ -119,7 +120,7 @@ class LoginController extends BaseController
         }
         
         if ($response['success'] == true) {
-            $token = md5(uniqid(mt_rand(), true));
+            $token = SecurityUtils::generateToken();
             
             self::$logger->debug("Updating username ($username) with token ($token)...");
             $db->update('user', array('token' => $token), "id = $user_id");
@@ -136,7 +137,7 @@ class LoginController extends BaseController
             $response['token'] = $token;
         }
         
-        sleep(2); // simulate network lag
+        //sleep(2); // simulate network lag
 
         echo Zend_Json::encode($response);
 	}

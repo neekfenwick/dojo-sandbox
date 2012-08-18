@@ -27,15 +27,8 @@ class SecurityController extends BaseController
 	      $response = array('success' => true, 'username' => $token_username);
 	  } else {
 		  $response = array('success' => false, 'message' => 'Could not validate token');
+          setcookie('token', '', 0, '/');
 	  }
-    } else if ($action == 'login') {
-      // @TODO validate username/password against db
-      $username = $this->getRequest()->getParam("username");
-      $password = $this->getRequest()->getParam("password");
-      // @TODO if valid, update token for this user
-      $newToken = "abcde";
-
-      $response = array('success' => true, 'token' => $newToken);
     } else {
       self::$logger->emerg("Unknown action ($action)!");
     }
