@@ -1,6 +1,8 @@
 <?php
 
 include_once('BaseController.php');
+include_once('helpers/SecurityUtils.php');
+include_once('helpers/BucketUtils.php');
 
 class SecurityException extends Exception {
 }
@@ -130,144 +132,136 @@ class RunController extends BaseController {
 	public function postAction(){
 		$this->_helper->viewRenderer->setNoRender(true);
 
-    $db = $this->_helper->database->getAdapter();
+        $db = $this->_helper->database->getAdapter();
 
-    // retrieve the guts of the bucket
-    $name = $this->getRequest()->getParam("name");
-    $description = $this->getRequest()->getParam("description");
-    $dojo_version = $this->getRequest()->getParam("dojo_version");
-    $dj_config = $this->getRequest()->getParam("dj_config");
-    $html = $this->getRequest()->getParam("html");
-		$javascript = $this->getRequest()->getParam("javascript");
-		$css = $this->getRequest()->getParam("css");
-    $layers = $this->getRequest()->getParam("layers");
+        // retrieve the guts of the bucket
+        $name = $this->getRequest()->getParam("name");
+        $description = $this->getRequest()->getParam("description");
+        $dojo_version = $this->getRequest()->getParam("dojo_version");
+        $dj_config = $this->getRequest()->getParam("dj_config");
+        $html = $this->getRequest()->getParam("html");
+            $javascript = $this->getRequest()->getParam("javascript");
+            $css = $this->getRequest()->getParam("css");
+        $layers = $this->getRequest()->getParam("layers");
 
-    // prepare the guts of the bucket, used in each kind of insert/update later
-    $bucket_contents = array(
-      'dojo_version' => $dojo_version,
-      'content_html' => $html,
-      'content_css' => $css,
-      'content_js' => $javascript,
-      'dj_config' => $dj_config,
-      'layers' => $layers);
+        // prepare the guts of the bucket, used in each kind of insert/update later
+        $bucket_contents = array(
+          'dojo_version' => $dojo_version,
+          'content_html' => $html,
+          'content_css' => $css,
+          'content_js' => $javascript,
+          'dj_config' => $dj_config,
+          'layers' => $layers);
 
-    // we will write back various fields depending on save_as_new
-    $response = array();
-    try {
+        $response = array();
+        try {
 
-        if (isset($_REQUEST['save_as_new'])) {
+            // We may not have been passed any identifying info
+            $token = $this->getRequest()->getParam("token");
+            $namespace = $this->getRequest()->getParam("namespace");
+            $id = $this->getRequest()->getParam("id");
+            $version = $this->getRequest()->getParam("version");
+            self::$logger->info("postAction namespace ($namespace) id ($id) version ($version)");
 
-          // We may not have been passed any identifying info
-          $token = $this->getRequest()->getParam("token");
-          $namespace = $this->getRequest()->getParam("namespace");
-          $id = $this->getRequest()->getParam("id");
-          $version = $this->getRequest()->getParam("version");
-          self::$logger->info("postAction namespace ($namespace) id ($id) version ($version)");
+            if (isset($_REQUEST['save'])) {
 
-          // sanitize $namespace - may be empty for new buckets
-          if (!isset($namespace) || $namespace == '') {
-              self::$logger->debug("namespace not set.  Check token ($token)");
-              if (isset($token) && $token != '') {
-                  $select = $db	->select('username')
-                                ->from('user')
-                                ->where('token = ?', $token);
-                  $token_rs = $db->fetchRow($select);
-                  if ($token_rs) {
-                      $namespace = $token_rs->username;
-                      self::$logger->info("token provided, going to use namespace $namespace");
-                  } else {
-                      self::$logger->emerg("Token ($token) could not be found in the database!");
-                      $namespace = 'public';
-                  }
-              } else {
-                self::$logger->info("namespace not provided, default to 'public'");
-                $namespace = 'public';
-              }
-          }
+                // sanitize $namespace - may be empty for new buckets
+                if (!isset($namespace) || $namespace == ''
+                        || $_REQUEST['save'] === 'fork') {
+                    self::$logger->debug("namespace not set or forking.  Check token ($token)");
+                    if (isset($token) && $token != '') {
+                        $token_namespace = BucketUtils::getNamespaceForToken($db, $token);
+                        if ($token_namespace) {
+                            $namespace = $token_namespace;
+                        }
+                    } else {
+                        self::$logger->info("namespace not provided, default to 'public'");
+                        $namespace = 'public';
+                    }
+                }
 
-          // If namespace is not 'public', verify that the provided token is valid
-          if ($namespace != 'public') {
-              self::$logger->debug("Verifying token ($token) for namespace ($namespace)...");
-              if (!isset($token)) {
-                  self::$logger->debug("Token not provided! Barf.");
-                  throw new SecurityException('Invalid token');
-              }
-              $select = $db->select('token')->from('user')->where('username = ?', $namespace);
-              $token_rs = $db->fetchRow($select);
-              if (!$token_rs || $token_rs->token != $token) {
-                  self::$logger->debug("Token ($token) should be (" . $token_rs->token . ") for namespace ($namespace)! Barf.");
-                  throw new SecurityException('Invalid token');
-              }
-              self::$logger->debug("token verified OK.");
-          }
+                SecurityUtils::verifyToken($db, $token, $namespace);
 
-          if (!isset($id) || $id == '') {
-            self::$logger->info("id not provided, generating new random id");
-            $accepted = false;
-            while (!$accepted) {
-              $id = substr(md5(uniqid(mt_rand(), true)), 0, 5);
-              $rs = $db->fetchRow($db->select()->from('bucket', 'COUNT(*) as count')
-                  ->where('namespace', $namespace)
-                  ->where('id', $id));
-              self::$logger->info(" .. try random id ($id) count " . $rs->count);
-              $accepted = ($rs->count == 0);
+                if (!isset($id) || $id == '' || $_REQUEST['save'] === 'fork') {
+                    self::$logger->info("id not provided or forking, generating new random id");
+                    $id = BucketUtils::generateId($db, $namespace);
+                }
+                if (!isset($version) || $_REQUEST['save'] === 'fork') {
+                    self::$logger->info("version not provided or forking, default to 0");
+                    $version = 0;
+                }
+                if ($_REQUEST['save'] == 'new_version') {
+                    $version++;
+                }
+
+
+                // The bucket may not yet exist
+                self::$logger->info("Running bucket count for namespace ($namespace) id ($id)...");
+                $select = $db->select()
+                        ->from('bucket', "COUNT(*) as cc")
+                        ->where('namespace = ?', $namespace)
+                        ->where('id = ?', $id);
+
+                if ($db->fetchRow($select)->cc == 0) {
+                    // sandbox does not yet exist, create it
+                    self::$logger->info('bucket does not yet exist');
+                    // Create the bucket
+                    $db->insert('bucket', array(
+                        'namespace' => $namespace,
+                        'id' => $id,
+                        'name' => $name,
+                        'description' => $description,
+                        'latest_version' => $version));
+                }
+
+                self::$logger->info("Running bucket_version count for namespace ($namespace) id ($id) version ($version)...");
+                $select = $db->select()
+                        ->from('bucket_version', "COUNT(*) as cc")
+                        ->where('bucket_namespace = ?', $namespace)
+                        ->where('bucket_id = ?', $id)
+                        ->where('version = ?', $version);
+                if ($db->fetchRow($select)->cc == 0) {
+                    // Create the initial version
+                    self::$logger->info("insert bucket_version");
+                    $db->insert('bucket_version', array_merge(
+                                    array(
+                                'bucket_namespace' => $namespace,
+                                'bucket_id' => $id,
+                                'version' => $version), $bucket_contents));
+                } else {
+
+                    self::$logger->info("update bucket_version ($version)");
+                    $db->update('bucket_version', $bucket_contents, array(
+                        'bucket_namespace = ?' => $namespace,
+                        'bucket_id = ?' => $id,
+                        'version = ?' => $version
+                    ));
+                }
+
+                // inform the caller of the new identity
+                $response = array(
+                    "success" => true,
+                    "namespace" => $namespace,
+                    "id" => $id,
+                    "version" => $version
+                );
+            } else if (isset($_REQUEST['save'])) {
+                // save_as_new was false, so overwrite existing version.
+                $db->update('bucket_version', array_merge(
+                                array(
+                            'bucket_namespace' => $namespace,
+                            'bucket_id' => $id,
+                            'version' => $version), $bucket_contents));
+                $response = array(
+                    "success" => true,
+                    "namespace" => $namespace,
+                    "id" => $id,
+                    "version" => $version
+                );
             }
-            self::$logger->info("Accepted new id ($id)");
-          }
-          if (!isset($version)) {
-            self::$logger->info("version not provided, default to 0");
-            $version = 0;
-          }
-
-          // The bucket may not yet exist
-          self::$logger->info("Running bucket count for namespace ($namespace) id ($id)...");
-          $select = $db	->select()
-                ->from('bucket', "COUNT(*) as cc")
-                ->where('namespace = ?', $namespace)
-                ->where('id = ?', $id); // sql-injection save quotation
-
-          if ($db->fetchRow($select)->cc == 0) {
-            // sandbox does not yet exist, create it
-            self::$logger->info('bucket does not yet exist');
-            // Create the bucket
-            $db->insert('bucket', array(
-                'namespace' => $namespace,
-                'id' => $id,
-                'name' => $name,
-                'description' => $description,
-                'latest_version' => $version));
-            // Create the initial version
-            self::$logger->info("create bucket_version dojo_version ($dojo_version)");
-            $db->insert('bucket_version', array_merge(
-                array(
-                  'bucket_namespace' => $namespace,
-                  'bucket_id' => $id,
-                  'version' => 0),
-                $bucket_contents));
-
-          } else {
-
-            $version ++;
-            self::$logger->info("save_as_new version becomes ($version)");
-            $db->insert('bucket_version', array_merge(
-                array(
-                  'bucket_namespace' => $namespace,
-                  'bucket_id' => $id,
-                  'version' => $version),
-                $bucket_contents));
-          }
-
-          // inform the caller of the new identity
-          $response = array(
-              "namespace" => $namespace,
-              "id"        => $id,
-              "version"   => $version
-          );
-
-        }
 
             $session = new Zend_Session_Namespace("runIframe");
-        $session->name = $name;
+            $session->name = $name;
             $session->content_html = $bucket_contents['content_html'];
             $session->content_js = $bucket_contents['content_js'];
             $session->content_css = $bucket_contents['content_css'];
@@ -275,13 +269,13 @@ class RunController extends BaseController {
             $session->dj_config = $bucket_contents['dj_config'];
             $session->layers = $bucket_contents['layers'];
             $session->session_id = rand(1,1000000);
-        $response['session_id'] = $session->session_id;
-    } catch (SecurityException $e) {
-        $response['success'] = false;
-        $response['exception'] = 'SecurityException';
-        $response['message'] = $e->getMessage();
-        
-    }
+            $response['session_id'] = $session->session_id;
+        } catch (SecurityException $e) {
+            $response['success'] = false;
+            $response['exception'] = 'SecurityException';
+            $response['message'] = $e->getMessage();
+
+        }
 		echo Zend_Json::encode($response);
 	}
 	

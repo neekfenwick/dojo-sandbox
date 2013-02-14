@@ -1,0 +1,67 @@
+<div data-dojo-attach-point="containerNode">
+	<div data-dojo-type="dijit/layout/ContentPane">
+	<h1>Your Bucket</h1>
+	<table class="bucketInfoTable">
+		<tbody>
+			<tr>
+				<td class="infoLabel" style="text-align: left" colspan="2">Name:</td>
+			</tr>
+			<tr>
+				<td class="infoValue" colspan="2">
+					<input data-dojo-type="dijit/form/TextBox"
+						   data-dojo-attach-point="bucketNameNode"
+						   data-dojo-props="style: 'width: 99%'"/>
+				</td>
+			</tr>
+			<tr>
+				<td class="infoLabel" style="text-align: left" colspan="2">Description</td>
+			</tr>
+			<tr>
+				<td class="infoValue" colspan="2">
+					<input data-dojo-type="dijit/form/Textarea"
+						   data-dojo-attach-point="bucketDescriptionNode"
+						   data-dojo-props="style: 'width: 100%'"/>
+				</td>
+			</tr>
+			<tr>
+				<td class="infoLabel">Namespace:</td>
+				<td class="infoValue">
+					<span data-dojo-attach-point="bucketNamespaceNode">
+				</td>
+			</tr>
+			<tr>
+				<td class="infoLabel">Id:</td>
+				<td class="infoValue">
+					<span data-dojo-attach-point="bucketIdNode"></span>
+				</td>
+			</tr>
+			<tr>
+				<td class="infoLabel">Version:</td>
+				<td class="infoValue">
+					<span data-dojo-attach-point="bucketVersionNode"></span>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<label class="leftLabel" for="versionSelect">Dojo Version:</label>
+	<br/>
+	<div data-dojo-type="dijit/form/Select" data-dojo-attach-point="versionSelect"
+		 id="versionSelect" style="width: 90%"></div>
+	<br/>
+	<fieldset data-dojo-attach-point="layersContainer" style="display: none"><legend>Layers</legend>
+	</fieldset>
+
+	<label class="leftLabel" for="djConfig">djConfig:</label>
+	<br/>
+	<div data-dojo-type="dijit/form/Textarea" data-dojo-attach-point="djConfig" value="async: true" class="djConfigArea" style="width: 100%"
+		 data-dojo-attach-event="onKeyUp: _djConfigChanged"></div>
+	<br/>
+	<div data-dojo-type="dijit/layout/ContentPane">
+		<span class="leftLabel">Parsed djConfig:</span>
+		<div class="djConfigParsed" data-dojo-attach-point="djConfigParsed"></div>
+	</div>
+	<div data-dojo-type="dijit/form/Button" label="Launch for Debug"
+		 data-dojo-attach-event="onClick: _launchClick"
+		 title="Open a new window containing this bucket, for easy script debugging."></div>
+	</div>
+</div>

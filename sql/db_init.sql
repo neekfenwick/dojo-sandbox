@@ -11,9 +11,11 @@
 DROP TABLE IF EXISTS user;
 CREATE TABLE user (
   id int NOT NULL AUTO_INCREMENT,
-  username VARCHAR(20) NOT NULL,   -- unique username
-  password VARCHAR(20) NOT NULL,   -- hashed password
-  role VARCHAR(10) NOT NULL,       -- e.g. 'user', 'admin'
+  username VARCHAR(20) NOT NULL,         -- unique username
+  password VARCHAR(20) NOT NULL,         -- hashed password
+  token VARCHAR(100) NULL,               -- security token, known when logged in
+  token_last_modified DATETIME NOT NULL, -- modified timestamp for token
+  role VARCHAR(10) NOT NULL,             -- e.g. 'user', 'admin'
   first_name TINYTEXT NOT NULL,
   last_name TINYTEXT NOT NULL,
   email TINYTEXT NOT NULL,
@@ -22,6 +24,9 @@ CREATE TABLE user (
   primary key (id),
   INDEX (username)
 ) ENGINE= MyISAM DEFAULT CHARSET = UTF8;
+
+ALTER TABLE user ADD COLUMN token VARCHAR(100) NULL;
+ALTER TABLE user ADD COLUMN token_last_modified DATETIME NOT NULL;
 
 -- bucket is the master identity table for each bucket
 DROP TABLE IF EXISTS bucket;
@@ -90,16 +95,16 @@ CREATE TABLE bucket_resource (
 
 -- INITIAL DATA
 
-INSERT INTO user (username, role, first_name, last_name, email) VALUES
-('public', 'user', 'Public', 'User', '');
+INSERT INTO user (username, password, created, last_modified, role, first_name, last_name, email) VALUES
+('public', 'password', NOW(), NOW(), 'user', 'Public', 'User', '');
 
-INSERT INTO bucket (namespace, id, name, description, latest_version)
+INSERT INTO bucket (namespace, id, name, description, created, last_modified, latest_version)
 VALUES
-('public', '1234', 'Test bucket', 'This is a test', 0);
+('public', '1234', 'Test bucket', 'This is a test', NOW(), NOW(), 0);
 
-INSERT INTO bucket_version (bucket_namespace, bucket_id, version, dojo_version, content_html, content_js, content_css, dj_config, layers)
+INSERT INTO bucket_version (created, last_modified, bucket_namespace, bucket_id, version, dojo_version, content_html, content_js, content_css, dj_config, layers)
 VALUES
-('public', '1234', '0', '1.5.0-nooptimize',
+(NOW(), NOW(), 'public', '1234', '0', '1.5.0-nooptimize',
 '<div dojoType="dijit.form.TextBox" id="tb"></div>',
 'dojo.require("dijit.form.TextBox"); dojo.ready(function() {   dijit.byId("tb").set("value", "dynamically set"); });',
 '', 'parseOnLoad: true', 'dijit-all');

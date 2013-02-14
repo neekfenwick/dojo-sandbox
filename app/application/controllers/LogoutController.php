@@ -46,7 +46,7 @@ class LogoutController extends BaseController
             setcookie('token', '', 0, '/');
         }
         
-        sleep(2); // simulate network lag
+        //sleep(2); // simulate network lag
         echo Zend_Json::encode($response);
 	}
 

@@ -1,0 +1,124 @@
+html, body, .frontend {
+	width: 100%; height: 100%;
+	margin: 0; padding: 0;
+}
+.claro .dijitContentPane {
+	padding: 0;
+}
+
+.frontend {
+	width: 100%; height: 100%;
+}
+
+.versionInfo{
+	color: #969696;
+	vertical-align: middle;
+}
+
+.userInfoNode {
+	display: inline-block;
+	float: right;
+}
+
+.userInfoNode .username {
+	color: green;
+	font-weight: bold;
+}
+
+/* Login form */
+#loginDlg FIELDSET {
+    border: 1px solid black;
+    padding: 0.4em;
+}
+#loginDlg LEGEND {
+    margin-left: 2em;
+}
+#loginDlg LABEL {
+    display: inline-block;
+    width: 8em;
+}
+#loginDlg P {
+    margin: 0;
+}
+#loginDlg #login_username,
+#loginDlg #login_password {
+    font-size: 2em;
+}
+
+/* Left hand pane pieces */
+.bucketInfo H1 {
+	text-align: center;
+	margin-top: 0;
+}
+.bucketInfo TABLE.bucketInfoTable {
+	border-collapse: collapse;
+}
+.bucketInfo .bucketInfoTable .infoLabel {
+	text-align: right;
+}
+.bucketInfo .infoLabel {
+	color: green;
+	padding-right: 0.5em;
+}
+.bucketInfo .infoLabel {
+	color: green;
+}
+.bucketInfo .djConfigArea {
+	width: 100%;
+}
+.bucketInfo .djConfigParsed {
+	border: 1px dotted black;
+	background: #eee;
+	margin: 0.4em;
+	padding: 0.2em;
+}
+.bucketInfo .djConfigError {
+	background-color: #ff9090;
+}
+.bucketInfo FIELDSET {
+	border: 1px solid black;
+	padding: 0 0 2px 5px;
+}
+.bucketInfo .layerName {
+	display: inline-block;
+	width: 8em;
+}
+.sandboxIcon {
+	background-repeat:no-repeat;
+	height:16px;
+	text-align:center;
+	width:16px;
+}
+.sandboxIconPlay {
+	background-image:url(img/play.png);
+}
+.sandboxIconDev {
+	background-image:url(img/dev.png);
+}
+.sandboxIconDesigner{
+	background-image:url(img/designer.png);
+}
+/* Dialog styles, see _DialogUtilsMixin */
+.dialogImg {
+	display: inline-block;
+	width: 128px;
+	height: 128px;
+	vertical-align: middle;
+}
+.errorDialogImg {
+	background: url('frontend/resources/Negative-icon.png');
+}
+.okDialogImg {
+	background: url('frontend/resources/Positive-icon.png');
+}
+.questionDialogImg {
+	background: url('frontend/resources/Help-icon.png');
+}
+.dialogText {
+	font-size: 1.5em;
+}
+
+/* CodeMirror overrides */
+.CodeMirror, .CodeMirror-scroll {
+	height: 100%;
+}

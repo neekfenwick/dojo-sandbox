@@ -1,0 +1,15 @@
+[submodule "app/public/lib/dojo/dojo"]
+	path = app/public/lib/dojo/dojo
+	url = git://github.com/dojo/dojo.git
+[submodule "app/public/lib/dojo/dijit"]
+	path = app/public/lib/dojo/dijit
+	url = git://github.com/dojo/dijit.git
+[submodule "app/public/lib/dojo/dojox"]
+	path = app/public/lib/dojo/dojox
+	url = git://github.com/dojo/dojox.git
+[submodule "app/public/lib/dojo/util"]
+	path = app/public/lib/dojo/util
+	url = git://github.com/dojo/util.git
+[submodule "app/public/lib/dojo/dojo-smore"]
+	path = app/public/lib/dojo/dojo-smore
+	url = git://github.com/kfranqueiro/dojo-smore.git

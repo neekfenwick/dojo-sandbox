@@ -2,6 +2,7 @@
 
 include_once('BaseController.php');
 include_once('helpers/SecurityUtils.php');
+include_once('helpers/BucketUtils.php');
 
 class BucketController extends BaseController
 {
@@ -96,7 +97,56 @@ class BucketController extends BaseController
 
 	// Handle POST requests to create a new resource item
 	public function postAction() {
-		echo "TODO: postAction()";
+        $db = $this->_helper->database->getAdapter();
+
+        // We use POST to fork buckets.  Rather non-standard, perhaps move into its
+        //  own Controller?
+        // We use the posted bucket rather than what might be in the database, so any
+        //  unsaved changes are retained.
+        $bucket = $this->gatherBucketFromRequest();
+
+        // We always fork into the current token's namespace, not the one the bucket
+        //  is coming from.  That way we can load another user's bucket and fork it
+        //  into our own namespace.
+        $token = $this->getRequest()->getParam("token");
+        $namespace = isset($token) ? BucketUtils::getNamespaceForToken($db, $token) : 'public';
+//        if (!isset($token)) {
+//            $namespace = 'public';
+//        } else {
+//            $namespace = BucketUtils::getNamespaceForToken($db, $token);
+//        }
+
+        // Come up with a new id for the bucket
+        $id = BucketUtils::generateId($db, $namespace);
+
+        $version = 0;
+        
+        self::$logger->info("forking incoming bucket " . $bucket['namespace'] . "/" . $bucket['id'] . "/" . $bucket['contents']['version'] . " to $namespace/$id/$version");
+        $db->insert('bucket', array(
+            'namespace' => $namespace,
+            'id' => $id,
+            'name' => $bucket['name'],
+            'description' => $bucket['description'],
+            'latest_version' => $version));
+
+        // Merge arrays so our new info overwrites the old
+        $db->insert('bucket_version', array_merge(
+            $bucket['contents'],
+            array(
+                'bucket_namespace' => $namespace,
+                'bucket_id' => $id,
+                'version' => $version
+            )));
+        
+        /* TODO fork files and resources table rows too? */
+        
+        $response = array(
+            "success" => true,
+            "namespace" => $namespace,
+            "id" => $id,
+            "version" => $version
+        );
+        echo Zend_Json::encode($response);
 	}
 
 	// Handle PUT requests to update a specific resource item
@@ -106,6 +156,25 @@ class BucketController extends BaseController
 
 	// Handle DELETE requests to delete a specific item
 	public function deleteAction() {
-		echo "TODO: deleteAction()";
+    $db = $this->_helper->database->getAdapter();
+    $namespace = $this->getRequest()->getParam("namespace");
+    $id = $this->getRequest()->getParam("id");
+    
+    $db->delete('bucket', array(
+        'namespace' => $namespace,
+        'id' => $id));
+    $db->delete('bucket_version', array(
+        'bucket_namespace' => $namespace,
+        'bucket_id' => $id));
+    $db->delete('bucket_file', array(
+        'bucket_namespace' => $namespace,
+        'bucket_id' => $id));
+    $db->delete('bucket_resource', array(
+        'bucket_namespace' => $namespace,
+        'bucket_id' => $id));
+    
+    echo Zend_Json::encode(array(
+        'success' => true
+    ));
 	}
 }

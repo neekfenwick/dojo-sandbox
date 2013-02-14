@@ -12,31 +12,28 @@ class SecurityController extends BaseController
 
 	public function indexAction() {
         $db = $this->_helper->database->getAdapter();
-    //@TODO: handle the query with $this->_getParam(...)
-    $action = $this->getRequest()->getParam("aaction");
-    self::$logger->info("security handling action ($action)");
+        //@TODO: handle the query with $this->_getParam(...)
+        $action = $this->getRequest()->getParam("action");
+        self::$logger->info("security handling action ($action)");
 
-    $response = array('success' => false); // fail by default
+        $response = array('success' => false); // fail by default
+//    if ($action == 'validateToken') {
+        // @TODO db lookup to validate token
+        $token = $this->getRequest()->getParam("token");
 
-    if ($action == 'validateToken') {
-      // @TODO db lookup to validate token
-      $token = $this->getRequest()->getParam("token");
-      
-      $token_username = SecurityUtils::getUsernameForToken($db, $token);
-      if (isset($token_username)) {
-	      $response = array('success' => true, 'username' => $token_username);
-	  } else {
-		  $response = array('success' => false, 'message' => 'Could not validate token');
-          setcookie('token', '', 0, '/');
-	  }
-    } else {
-      self::$logger->emerg("Unknown action ($action)!");
+        $token_username = SecurityUtils::getUsernameForToken($db, $token);
+        if (isset($token_username)) {
+            $response = array('success' => true, 'username' => $token_username);
+        } else {
+            $response = array('success' => false, 'message' => 'Could not validate token');
+            setcookie('token', '', 0, '/');
+        }
+//    } else {
+//      self::$logger->emerg("Unknown action ($action)!");
+//    }
+
+        echo Zend_Json::encode($response);
     }
-
-		//$data = new Zend_Dojo_Data('id', $this->_items, "name");
-		//echo $data->toJson();
-    echo Zend_Json::encode($response);
-	}
 
 	// Handle GET and return a specific resource item
 	public function getAction() {

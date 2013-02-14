@@ -8,10 +8,9 @@ if [[ ! -e $COPYRIGHT ]] ; then
 fi
 
 
-function build_a_version() {
+function build() {
 VERSION=$1
-# --------------- dojo 1.6.1 ---------------
-BUILDSCRIPTS=../lib/dojo-release-$VERSION-src/util/buildscripts
+BUILDSCRIPTS=../lib/dojo/util/buildscripts
 if [[ ! -e $BUILDSCRIPTS ]] ; then
 	echo Cannot find buildscripts dir $BUILDSCRIPTS
 	exit 1
@@ -22,18 +21,18 @@ cp $COPYRIGHT $BUILDSCRIPTS
 pushd $BUILDSCRIPTS
 
 echo Calling build.sh in `pwd`
-./build.sh profile=../../../../../config/sandbox releaseName=dojo-$VERSION-sandbox version=$VERSION-sandbox releaseDir=../../.. optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
+./build.sh -p ../../../../config/sandbox -r --releaseName dojo-sandbox
 
-./build.sh profile=../../../../../config/sandbox releaseName=dojo-$VERSION-sandbox-nooptimize version=$VERSION-sandbox releaseDir=../../.. optimize=none cssOptimize=none layerOptimize=none stripConsole=none action=clean,release
+#./build.sh -p ../../../../config/sandbox-nooptimize -r --releaseName $VERSION-sandbox-nooptimize
 
+popd
+
+pushd ../lib/dojo-sandbox
+find . \( -name \*.uncompressed.js -o -name \*.consoleStripped.js \) -exec rm {} \;
 popd
 # --------------- dojo $VERSION ---------------
 }
 
-#build_a_version '1.5.1'
-build_a_version '1.6.1'
-
-
-
+build
 
 echo Finished at `date`

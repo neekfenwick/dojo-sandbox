@@ -1,0 +1,63 @@
+<div data-dojo-attach-point="containerNode">
+	<div data-dojo-type="dijit/layout/BorderContainer"
+		 data-dojo-props="gutters: false"
+		 data-dojo-attach-point="mainBorderContainer"
+		 style="height: 100%; width: 100%;">
+		<div data-dojo-type="dijit/layout/ContentPane"
+			 data-dojo-props="region: 'top'">
+			<div data-dojo-type="dijit.Toolbar">
+				<div data-dojo-attach-point="userInfoNode" class="userInfoNode dijitButton dijitButtonNode"></div>
+				<button data-dojo-type="dojox/form/BusyButton"
+						data-dojo-attach-event="onClick: _saveasnewClick">Save As New</button>
+				<button data-dojo-type="dojox/form/BusyButton"
+					 data-dojo-props="disabled: true"
+					 data-dojo-attach-point="saveButton"
+					 data-dojo-attach-event="onClick: _saveClick">Save</button>
+				<button data-dojo-type="dojox/form/BusyButton"
+						data-dojo-props="disabled: true"
+						data-dojo-attach-point="forkButton"
+						data-dojo-attach-event="onClick: _forkClick">Fork</button>
+				<button data-dojo-type="dojox/form/BusyButton"
+						data-dojo-props="disabled: true"
+						data-dojo-attach-point="deleteButton"
+						data-dojo-attach-event="onClick: _deleteClick">Delete</button>
+				<span data-dojo-type="dijit/ToolbarSeparator"></span>
+				<label>Template:</label>
+				<select data-dojo-type="dijit/form/FilteringSelect"
+						data-dojo-props="searchAttr: 'name', placeHolder: 'Select a template...'"
+						data-dojo-attach-point="templateSelect"
+						data-dojo-attach-event="onChange: _templateSelected"
+						title="Jump to a pre-prepared template bucket to kick-start your development."></select>
+				<span data-dojo-type="dijit/ToolbarSeparator"></span>
+				<div class="dijitInline versionInfo"
+					 ><span class="version" data-dojo-attach-point="versionInfoNode"
+					 ></span><button data-dojo-type="dijit/form/Button"
+						 title="See a list of what has changed in the dojo-sandbox app."
+						 data-dojo-props="label: 'Changelog'"
+						 data-dojo-attach-event="onClick: _changelogClick"
+				></button><a target="_blank" href="/media/quick/quick.html">Video tutorial</a></div>
+			</div>
+		</div>
+		<div data-dojo-type="sandbox/frontend/SetupPane" style="width: 170px;"
+			 data-dojo-attach-point="setupPane"
+			 data-dojo-props="region: 'left', splitter: true"
+			 class="bucketInfo">			
+		</div>
+		<div data-dojo-type="dijit/layout/TabContainer"
+			 data-dojo-attach-point="centerTabContainer"
+			 data-dojo-props="region: 'center', doLayout: true">
+			<div data-dojo-type="sandbox/frontend/EditorTab"
+				 data-dojo-attach-point="editorTab"
+				 data-dojo-props="title: 'Develop', iconClass: 'sandboxIcon sandboxIconDev'">
+			</div>
+			<!--div data-dojo-type="wuhi/designer/Designer" data-dojo-attach-point="designerWidget" iconClass="sandboxIcon sandboxIconDesigner" title="WYSIWYG">
+			</div-->
+			<div data-dojo-type="dijit/layout/ContentPane"
+				 data-dojo-attach-event="onShow:_runClick"
+				 data-dojo-props="title: 'Run', iconClass: 'sandboxIcon sandboxIconPlay'">
+				<iframe data-dojo-attach-point="iframeRunNode" style="height: 100%; width: 100%; border: none;">
+				</iframe>
+			</div>
+		</div>
+	</div>
+</div>
