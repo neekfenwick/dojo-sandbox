@@ -3,38 +3,34 @@ GETTING STARTED
 
 To get the dojo-sandbox repo in a local dir:
 
-$ git clone git@github.com:neekfenwick/dojo-sandbox.git
+$ git clone https://github.com/neekfenwick/dojo-sandbox.git
 
 ..edit files..
 
 $ git commit -a
 $ git push
 
-dojo-sandbox runs off a custom build of dojo called dojo-1.5.0-sandbox, as well as
-having various versions of dojo available for running each sandbox.
+dojo-sandbox runs off a custom build of dojo called dojo-sandbox, as well as
+having various versions of dojo available for running each sandbox.  The actual
+dojo-sandbox app lives in app/public/lib/dojo in which there are:
 
-To build the dojo-1.5.0-sandbox custom build to lib/dojo:
+dojo - submodule pointing to github.com/dojo/dojo.git
+dijit - submodule pointing to github.com/dojo/dijit.git
+dojox - submodule pointing to github.com/dojo/dojox.git
+util - submodule pointing to github.com/dojo/util.git
+sandbox - our custom dijits for the dojo-sandbox GUI
+
+To build the dojo-sandbox custom build to lib/dojo:
 
 $ cd app/public/config
 $ ./build-sandbox-dojo.js
 
-Or, run the steps yourself:
-
-$ cd app/public/lib/dojo-release-1.5.0-src/util/buildscripts
-$ cp ../../../../config/sandboxCopyright.txt .
-$ ./build.sh profile=../../../../../config/sandbox releaseName=dojo version=1.5.0-sandbox releaseDir=../../.. optimize=shrinksafe cssOptimize=comments layerOptimize=shrinksafe stripConsole=normal action=clean,release
-
-To build all the versions of dojo available when running sandboxes, first have
-the various dojo SDKs available, e.g.
-
-app/lib/dojo-release-1.4.3-src
-app/lib/dojo-release-1.5.0-src
-app/lib/dojo-release-1.6.0b2-src
-
-Then run the build script to run the build process in each one:
+To build all the versions of dojo available when running sandboxes, run the build script to run the build process in each one:
 
 $ cd app/public/config
 $ ./build-all-dojo.sh
+
+This fetches and builds all the versions of dojo that are available in dojo-sandbox to run your buckets against (1.7.0, 1.7.2, 1.7.2, 1.7.3, 1.8.0 etc).
 
 All libraries (dojo-sandbox and the various dojo-* builds) are built into app/lib,
 not their respective <dojo-sdk-dir>/release directories.  You should get a set
@@ -50,28 +46,16 @@ CALLING THE APP
 
 For development, we have the option of running compiled or non-compiled versions of the code, and whether we include the layer .js files or not.  Note that debug=1 and no*layer=1 are incompatible, because the -src dir doesn't have the layer files.
 
-To run in 'build' mode, using dojo in lib/dojo and built layers:
+To run in 'build' mode, using dojo in lib/dojo-sandbox and built layers (the default):
 http://myserver.com/index.php
 
-To run in 'debug' mode, using dojo in lib/dojo-release-1.5.0-src
+To run in 'debug' mode, using dojo in lib/dojo (i.e. unoptimised code, for developing dojo-sandbox itself):
 http://myserver.com/index.php?debug=1
 
 Turning on 'debug':
 - uses the SDK version of dojo for the sandbox frontend
-- uses the source 'app/lib/sandbox' directory for the sandbox.* modules
+- uses the source 'app/lib/dojo//sandbox' directory for the sandbox/* modules
 - turns on "debug: true" in djConfig
-
-To not load the sandbox.js layer (so that dojo loads fast but sandbox dijits are loaded separately):
-http://myserver.com/index.php?nosandboxlayer=1
-
-This will omit the <script> tag for the sandbox.js file, which means all
-dojo.require() statements for our sandbox.* modules result in explicit network
-calls for the files, making them easier to debug.
-
-There are also "nodojodepslayer" which excludes the <script> tag for the
-dojodeps.js file which contains core dojo/dijit/dojox dependencies of the sandbox
-frontend, and "nodesignerlayer" which excludes the <script> tag for the layer
-containing the designer modules.
 
 SETTING UP THE VIRTUAL HOST
 -----------------
@@ -121,7 +105,7 @@ be run directly with http://dojo-sandbox.net/backend/run/index/session_id/705557
 EMBEDDING DOJO-SANDBOX VIA A DIALOG
 -----------------------------------
 
-Experimental sandbox.BucketButton and sandbox.BucketDialog dijits exist which
+Experimental sandbox/BucketButton and sandbox/BucketDialog dijits exist which
 can be used to launch a bucket in a standalone dialog, their content enclosed
 in an iframe and so distinct from the rest of the page's contents.  For example:
 
@@ -132,7 +116,8 @@ show the iframe, or "showSource: true" (default) to make it display a TabContain
 with html/js/css panes as well as the Run pane.
 
 At present it's very basic and doesn't try to syntax highlight or present its
-content well.
+content well.  Anyone interested in this should speak to the project maintainers
+to talk about the future direction of these modules.
 
 --
 End of file.
